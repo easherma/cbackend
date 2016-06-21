@@ -5,36 +5,40 @@
 
 import luigi
 import itertools
+import datetime
+import csv
 
 class FetchFiles(luigi.Task):
     """
     Lets fetch those client files
     """
-    date = luigi.DateParameter(defualt=datetime.date.today())
+    date = luigi.DateParameter(default=datetime.date.today())
     row_limit = 5
     file_limit = 1
     directory_target = 'path/to/folder'
-    file_target = './out6_file3_address_3_clean.csv'
+    file_target = '../temp/out6_file3_address_10_clean.csv'
 
     def output(self):
         return luigi.LocalTarget('temp/fetched-%s.txt' % self.date)
 
     def run(self):
-        for i in itertools.islice(csv.DictReader(open(file_target)), row_limit):
-            with self.output().open('w+') as f:
-                f.write(i)
+        for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
+		print i
+     #       with self.output().open('w+') as f:
+     #           f.write(i)
+if __name__ == '__main__':
+    luigi.run()
 
 
 
+#class CleanFiles(luigi.Task):
 
-class CleanFiles(luigi.Task):
+#class NormalizeAddys(luigi.Task):
 
-class NormalizeAddys(luigi.Task):
-
-class GeocodeAddys(luigi.Task):
-
+#class GeocodeAddys(luigi.Task):
 
 
-with open(address_list, 'rb') as f:
-    in_csv1 = csv.DictReader(f)
-    for row in in_csv1:
+
+#with open(address_list, 'rb') as f:
+#    in_csv1 = csv.DictReader(f)
+#    for row in in_csv1:
