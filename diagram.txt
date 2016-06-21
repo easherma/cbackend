@@ -1,0 +1,42 @@
+@startuml
+title Proposed Data Pipeline for Bulk Geocoder
+header
+Author: Eric Sherman
+end header
+start
+:Client Data;
+note left: Most likely flat files.
+partition Python;
+note right: Will use the Python [[https://pypi.python.org/pypi/luigi Luigi Library]]
+:Fetch Data;
+:Clean;
+note right: This step may be optional/consolidated into the next step
+:Address Normalization;
+note right: [[https://github.com/openvenues/pypostal libpostal ]]
+}
+partition Postgres+PostGIS {
+:Load into Relational DB;
+if (Address previously Geocoded?) then (yes)
+:Read From Cached DB;
+else (no)
+
+:Geocode;
+
+note right
+*Read from normalized input table
+*Parse rows into [[https://github.com/pelias/api Pelias]] API calls
+*Get [[http://geojson.org/ GeoJSON]] output
+**Parse/Process GeoJSON
+end note
+endif
+:Post-Processing;
+note left: Validate and join results, \n this will mimic current processes
+}
+:Export;
+note right: Check client output requirements.
+
+end
+
+
+
+@enduml
