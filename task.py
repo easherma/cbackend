@@ -5,6 +5,7 @@
 
 import luigi
 import itertools
+import datetime
 
 class FetchFiles(luigi.Task):
     """
@@ -21,20 +22,22 @@ class FetchFiles(luigi.Task):
 
     def run(self):
         for i in itertools.islice(csv.DictReader(open(file_target)), row_limit):
-            with self.output().open('w+') as f:
-                f.write(i)
+            print i
+            #with self.output().open('w+') as f:
+            #    f.write(i)
+if __name__ == '__main__':
+    luigi.run()
 
 
 
+#class CleanFiles(luigi.Task):
 
-class CleanFiles(luigi.Task):
+#class NormalizeAddys(luigi.Task):
 
-class NormalizeAddys(luigi.Task):
-
-class GeocodeAddys(luigi.Task):
-
+#class GeocodeAddys(luigi.Task):
 
 
-with open(address_list, 'rb') as f:
-    in_csv1 = csv.DictReader(f)
-    for row in in_csv1:
+
+#ith open(address_list, 'rb') as f:
+#    in_csv1 = csv.DictReader(f)
+#    for row in in_csv1:
