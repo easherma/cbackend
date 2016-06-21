@@ -26,6 +26,7 @@ class FetchFiles(luigi.Task):
 		print i
      #       with self.output().open('w+') as f:
      #           f.write(i)
+
 if __name__ == '__main__':
     luigi.run()
 
@@ -39,6 +40,10 @@ if __name__ == '__main__':
 
 
 
+<<<<<<< HEAD
 #with open(address_list, 'rb') as f:
+=======
+#ith open(address_list, 'rb') as f:
+>>>>>>> 74090f666455541028d0fde1b796931238aca305
 #    in_csv1 = csv.DictReader(f)
 #    for row in in_csv1:
