@@ -28,7 +28,7 @@ class FetchFiles(luigi.Task):
      #           f.write(i)
 
 if __name__ == '__main__':
-    luigi.run()
+    luigi.run(["--local-scheduler"])
 
 
 
@@ -40,10 +40,8 @@ if __name__ == '__main__':
 
 
 
-<<<<<<< HEAD
+
+#with open(address_list, 'rb') as f:=
 #with open(address_list, 'rb') as f:
-=======
-#ith open(address_list, 'rb') as f:
->>>>>>> 74090f666455541028d0fde1b796931238aca305
 #    in_csv1 = csv.DictReader(f)
 #    for row in in_csv1:
