@@ -20,7 +20,7 @@ class FetchFiles(luigi.Task):
     file_target = '../temp/out6_file3_address_10_clean.csv'
 
     def output(self):
-        return luigi.LocalTarget('selected-%s.csv' % self.date)
+        return luigi.LocalTarget('in/selected-%s.csv' % self.date)
 
     def run(self):
     #    for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
@@ -42,11 +42,13 @@ class FetchFiles(luigi.Task):
             return picked
 
         def return_selected_columns():
+            print self.output().path
             columns_chosen = pick_columns()
             print columns_chosen
             selected_columns = load_selected_columns(columns_chosen)
-            with self.output().open('w') as outfile:
-                selected_columns.to_csv()
+           # with self.output().open('w') as outfile:
+            selected_columns.to_csv(self.output().path)
+
 
 
 
