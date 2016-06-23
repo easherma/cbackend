@@ -7,6 +7,7 @@ import luigi
 import itertools
 import datetime
 import csv
+import pandas as pd
 
 class FetchFiles(luigi.Task):
     """
@@ -27,8 +28,8 @@ class FetchFiles(luigi.Task):
      #       with self.output().open('w+') as f:
      #           f.write(i)
         def pick_columns():
-            sample = pd.read_csv('test.csv', nrows=5)
-            for i, v in enumerate(new.columns): #print out columns with index
+            sample = pd.read_csv(self.file_target, nrows=5)
+            for i, v in enumerate(sample.columns): #print out columns with index
                 print i, v
             col_indexes = [1,3,4,5]
             sample_columns = sample.columns[[1,3,4,5]]
@@ -37,7 +38,7 @@ class FetchFiles(luigi.Task):
             return chosen
 
         def load_selected_columns(chosen):
-            picked = pd.read_csv('test.csv', usecols = chosen)
+            picked = pd.read_csv(self.file_target, usecols = chosen)
             return picked
 
         def return_selected_columns():
@@ -49,7 +50,7 @@ class FetchFiles(luigi.Task):
         return_selected_columns()
 
 if __name__ == '__main__':
-    luigi.run(["--local-scheduler"])
+    luigi.run()
 
 
 
