@@ -22,10 +22,31 @@ class FetchFiles(luigi.Task):
         return luigi.LocalTarget('temp/fetched-%s.txt' % self.date)
 
     def run(self):
-        for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
-		print i
+    #    for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
+	#	print i
      #       with self.output().open('w+') as f:
      #           f.write(i)
+        def pick_columns():
+            sample = pd.read_csv('test.csv', nrows=5)
+            for i, v in enumerate(new.columns): #print out columns with index
+                print i, v
+            col_indexes = [1,3,4,5]
+            sample_columns = sample.columns[[1,3,4,5]]
+            chosen = sample_columns.tolist()
+            #print "Your chosen columns are: " + chosen
+            return chosen
+
+        def load_selected_columns(chosen):
+            picked = pd.read_csv('test.csv', usecols = chosen)
+            return picked
+
+        def return_selected_columns():
+            test = pick_columns()
+            print test
+            test2 = load_selected_columns(test)
+            return test2
+
+        return_selected_columns()
 
 if __name__ == '__main__':
     luigi.run(["--local-scheduler"])
@@ -37,11 +58,3 @@ if __name__ == '__main__':
 #class NormalizeAddys(luigi.Task):
 
 #class GeocodeAddys(luigi.Task):
-
-
-
-
-#with open(address_list, 'rb') as f:=
-#with open(address_list, 'rb') as f:
-#    in_csv1 = csv.DictReader(f)
-#    for row in in_csv1:
