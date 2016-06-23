@@ -45,7 +45,9 @@ class FetchFiles(luigi.Task):
             columns_chosen = pick_columns()
             print columns_chosen
             selected_columns = load_selected_columns(columns_chosen)
-            selected_columns.to_csv(self.output())
+            with self.output().open('w') as outfile:
+                selected_columns.to_csv()
+
 
 
         return_selected_columns()
