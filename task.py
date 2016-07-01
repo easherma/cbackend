@@ -55,9 +55,6 @@ class FetchFiles(luigi.Task):
 
         return_selected_columns()
 
-if __name__ == '__main__':
-    luigi.run()
-
 
 
 #class CleanFiles(luigi.Task):
@@ -76,7 +73,6 @@ class GeocodeAddys(luigi.Task):
 	file_limit = 1
 	directory_target = 'path/to/folder'
 	file_target = '/home/esherman/cbackend/in/selected/selected-2016-06-23.csv'
-'
 
 	def output(self):
         	return luigi.LocalTarget('in/geocoded/geocoded-%s.csv' % self.date)
@@ -96,7 +92,8 @@ class GeocodeAddys(luigi.Task):
 		        panda_results = pd.DataFrame.read_json(results)
 		        with open('/test.json', 'wb') as fd:
 		        	fd.write(json.dumps(results))
-
+if __name__ == '__main__':
+    luigi.run()
 
         		
         		
