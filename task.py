@@ -8,6 +8,7 @@ import itertools
 import datetime
 import csv
 import pandas as pd
+import requests
 
 class FetchFiles(luigi.Task):
     """
@@ -62,5 +63,46 @@ if __name__ == '__main__':
 #class CleanFiles(luigi.Task):
 
 #class NormalizeAddys(luigi.Task):
+	
+#	def output(self):
+#        	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
+        
+#        def run(self):
+        	
 
-#class GeocodeAddys(luigi.Task):
+class GeocodeAddys(luigi.Task):
+	date = luigi.DateParameter(default=datetime.date.today())
+	row_limit = 5
+	file_limit = 1
+	directory_target = 'path/to/folder'
+	file_target = '/home/esherman/cbackend/in/selected/selected-2016-06-23.csv'
+'
+
+	def output(self):
+        	return luigi.LocalTarget('in/geocoded/geocoded-%s.csv' % self.date)
+        
+        def run(self):
+        	def get_address_from_row():
+        		pd.read_csv(self.file_target, nrows=5, usecols=[:1])
+        		print something
+        		param = concated colu,s
+
+        		
+        		
+        	
+        	def prepare_requests()
+        	
+        	def send_requests()
+        	
+        	def write_results()
+        	
+    def get_address_json_from_row(params):
+    # params = {k: '"{}"'.format(v) for k,v in row.iteritems()} #api requires double quotes to avoid null responses
+    j = json.loads(json.dumps(row))
+    address = j['address']
+    city = j['city']
+    state = j['state']
+    params = {"state":state, "city": city, "address": address }
+    response = requests.post('http://tod.chicagocityscape.com/tod/index.php?address=' + address + '&city=' + city + '&state=' + state)
+    url = response.url
+    return {"response": response.json(), "url": url}
