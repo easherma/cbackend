@@ -24,8 +24,8 @@ class FetchFiles(luigi.Task):
         return luigi.LocalTarget('in/selected-%s.csv' % self.date)
 
     def run(self):
-    #    for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
-	#	print i
+#    for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
+#	print i
      #       with self.output().open('w+') as f:
      #           f.write(i)
         def pick_columns():
@@ -83,26 +83,27 @@ class GeocodeAddys(luigi.Task):
         
         def run(self):
         	def get_address_from_row():
-        		pd.read_csv(self.file_target, nrows=5, usecols=[:1])
-        		print something
-        		param = concated colu,s
+        		results = []
+        		urls = []
+        		with open('selected-2016-06-23.csv','rb') as f:
+			    in_csv1= csv.reader(f)
+			    for row in in_csv1:
+		            	params= {"text": (row[1:])}
+		            	params['text'] = (", ".join(params['text']))
+		            	r = requests.get(url, params)
+		            	urls.append(r.url)
+		            	results.append(r.json())
+		        panda_results = pd.DataFrame.read_json(results)
+		        with open('/test.json', 'wb') as fd:
+		        	fd.write(json.dumps(results))
+
 
         		
         		
         	
-        	def prepare_requests()
+        	#def prepare_requests()
         	
-        	def send_requests()
+        	#def send_requests()
         	
-        	def write_results()
+        	#def write_results()
         	
-    def get_address_json_from_row(params):
-    # params = {k: '"{}"'.format(v) for k,v in row.iteritems()} #api requires double quotes to avoid null responses
-    j = json.loads(json.dumps(row))
-    address = j['address']
-    city = j['city']
-    state = j['state']
-    params = {"state":state, "city": city, "address": address }
-    response = requests.post('http://tod.chicagocityscape.com/tod/index.php?address=' + address + '&city=' + city + '&state=' + state)
-    url = response.url
-    return {"response": response.json(), "url": url}
