@@ -9,6 +9,8 @@ import datetime
 import csv
 import pandas as pd
 import requests
+import json
+import geojson
 
 class FetchFiles(luigi.Task):
     """
@@ -57,50 +59,87 @@ class FetchFiles(luigi.Task):
 
 
 
-#class CleanFiles(luigi.Task):
+class CleanFiles(luigi.Task):
+
+    f = luigi.Parameter() #input file named on the command line call
+
+    def run(self):
+        in_f = self.f #pass the class parm into the run function
+        df = pd.read_csv(in_f)
+        del df['Unnamed: 0'] #remote index column, this shouldn't be needed
+        print len(df)
+        df2 = df.drop_duplicates()
+        print "dropped dupes, new length:", len(df2)
+        with self.output().open('w') as fd:
+            df2.to_csv(fd, index_label = False)
+        # write to file targert
+
+
+    def output(self):
+        return luigi.LocalTarget('./in/deduped.csv')
+
 
 #class NormalizeAddys(luigi.Task):
-	
+
 #	def output(self):
 #        	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
-        
+
 #        def run(self):
-        	
+
 
 class GeocodeAddys(luigi.Task):
-	date = luigi.DateParameter(default=datetime.date.today())
-	row_limit = 5
-	file_limit = 1
-	directory_target = 'path/to/folder'
-	file_target = '/home/esherman/cbackend/in/selected/selected-2016-06-23.csv'
+    date = luigi.DateParameter(default=datetime.date.today())
+    row_limit = 5
+    file_limit = 1
+    directory_target = 'path/to/folder'
 
-	def output(self):
-        	return luigi.LocalTarget('in/geocoded/geocoded-%s.csv' % self.date)
-        
-        def run(self):
-        	def get_address_from_row():
-        		results = []
-        		urls = []
-        		with open('selected-2016-06-23.csv','rb') as f:
-			    in_csv1= csv.reader(f)
-			    for row in in_csv1:
-		            	params= {"text": (row[1:])}
-		            	params['text'] = (", ".join(params['text']))
-		            	r = requests.get(url, params)
-		            	urls.append(r.url)
-		            	results.append(r.json())
-		        panda_results = pd.DataFrame.read_json(results)
-		        with open('/test.json', 'wb') as fd:
-		        	fd.write(json.dumps(results))
+
+    def requires(self):
+        return CleanFiles()
+
+    def output(self):
+        return luigi.LocalTarget('./in/geocoded-%s.csv' % self.date)
+
+    def run(self):
+        url = 'https://search.mapzen.com/v1/search?api_key=search-iv_vGuI'
+        results = []
+        urls = []
+        df2 = pd.read_csv(self.input().open('r'), dtype= 'str')
+
+        for row in df2.values:
+            params= {'text': str(", ".join([str(i) for i in row]))}
+            print params
+            #params['text'] = (", ".join(params['text']))
+            #print params
+            r = requests.get(url, params)
+            urls.append(r.url) #urls to look at full results later
+            results.append(r.json()['features'][0]) # most confident result
+            geo = geojson.FeatureCollection(results)
+
+        with self.output().open('wb') as fd:
+            fd.write(json.dumps(results))
+
+        with open('./in/test.geojson', 'wb') as fd:
+            fd.write(geojson.dumps(geo))
+
+        with open('./in/urls.json', 'wb') as fd:
+            fd.write(json.dumps(urls))
+
+class BulkGeo(luigi.WrapperTask):
+    date = luigi.DateParameter(default=datetime.date.today())
+    def requires(self):
+        yield CleanFiles(self)
+        yield GeocodeAddys(self.date)
+
+
 if __name__ == '__main__':
     luigi.run()
 
-        		
-        		
-        	
+
+
+
         	#def prepare_requests()
-        	
+
         	#def send_requests()
-        	
+
         	#def write_results()
-        	
