@@ -11,6 +11,15 @@ import pandas as pd
 import requests
 import json
 import geojson
+import sys
+
+class options(luigi.Config):
+    setting = luigi.Parameter(default='world')
+    intoption = luigi.IntParameter(default=555)
+
+options().setting
+options().intoption
+print setting, intoption
 
 class FetchFiles(luigi.Task):
     """
@@ -19,7 +28,7 @@ class FetchFiles(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
     row_limit = 5
     file_limit = 1
-    directory_target = 'path/to/folder'
+    directory_target = luigi.Parameter(default )'path/to/folder'
     file_target = '../temp/out6_file3_address_10_clean.csv'
 
     def output(self):
@@ -35,7 +44,8 @@ class FetchFiles(luigi.Task):
             for i, v in enumerate(sample.columns): #print out columns with index
                 print i, v
             col_indexes = [1,3,4,5]
-            sample_columns = sample.columns[[1,3,4,5]]
+            sample_columns = raw_input("Which columns?")
+            #sample_columns = sample.columns[[1,3,4,5]]
             chosen = sample_columns.tolist()
             #print "Your chosen columns are: " + chosen
             return chosen
