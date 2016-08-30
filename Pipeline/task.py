@@ -23,7 +23,7 @@ print setting, intoption
 
 class FetchFiles(luigi.Task):
     """
-    Lets fetch those client files
+    Lets fetch those client files. This is likely to be replaced by a config file.
     """
     date = luigi.DateParameter(default=datetime.date.today())
     row_limit = 5
@@ -35,10 +35,6 @@ class FetchFiles(luigi.Task):
         return luigi.LocalTarget('in/selected-%s.csv' % self.date)
 
     def run(self):
-#    for i in itertools.islice(csv.DictReader(open('../temp/out6_file3_address_10_clean.csv')),5 ):
-#	print i
-     #       with self.output().open('w+') as f:
-     #           f.write(i)
         def pick_columns():
             sample = pd.read_csv(self.file_target, nrows=5)
             for i, v in enumerate(sample.columns): #print out columns with index
@@ -59,17 +55,16 @@ class FetchFiles(luigi.Task):
             columns_chosen = pick_columns()
             print columns_chosen
             selected_columns = load_selected_columns(columns_chosen)
-           # with self.output().open('w') as outfile:
             selected_columns.to_csv(self.output().path)
-
-
-
 
         return_selected_columns()
 
 
 
 class CleanFiles(luigi.Task):
+    """
+    atm this just removes dupes
+    """
 
     f = luigi.Parameter() #input file named on the command line call
 
@@ -89,19 +84,21 @@ class CleanFiles(luigi.Task):
         return luigi.LocalTarget('./in/deduped.csv')
 
 
-#class NormalizeAddys(luigi.Task):
+class NormalizeAddys(luigi.Task):
+"""
+on hold pending updates from Mapzen search
+"""
 
-#	def output(self):
-#        	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
-
-#        def run(self):
+	def output(self):
+        	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
+       def run(self):
 
 
 class GeocodeAddys(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
-    row_limit = 5
-    file_limit = 1
-    directory_target = 'path/to/folder'
+    row_limit = 5 #config
+    file_limit = 1 #config
+    directory_target = 'path/to/folder' #config
 
 
     def requires(self):
@@ -137,6 +134,10 @@ class GeocodeAddys(luigi.Task):
             fd.write(json.dumps(urls))
 
 class BulkGeo(luigi.WrapperTask):
+    """
+    the thought/intention here is to eventually have a 'master' task that runs needed tasks.
+    Might be needed more as complexity of individual steps.
+    """
     date = luigi.DateParameter(default=datetime.date.today())
     def requires(self):
         yield CleanFiles(self)
