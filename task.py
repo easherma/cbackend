@@ -1,4 +1,4 @@
-# Luigi is a framework for building data pipelines and managing workflows.
+# Luigi is a framework for building data pipelines and managing workflows.:
 # It also gives us some visualization tools and a nifty command line interface
 # Data pipelines are built through defined 'Task' instances. Each Task can be dependent
 # on a previous task, and has a defined output for each task that defines how the task is completed and where the results are written
@@ -11,6 +11,9 @@ import pandas as pd
 import requests
 import json
 import geojson
+import ogr
+import os 
+import subprocess
 
 class FetchFiles(luigi.Task):
     """
@@ -92,30 +95,36 @@ class GeocodeAddys(luigi.Task):
     row_limit = 5
     file_limit = 1
     directory_target = 'path/to/folder'
-
+    f = luigi.Parameter()
 
     def requires(self):
         return CleanFiles()
 
     def output(self):
-        return luigi.LocalTarget('./in/gecoded/geocoded-%s.csv' % self.date)
+        return luigi.LocalTarget('./in/gecoded/geocoded-%s.json'% self.date)
 
     def run(self):
         url = 'http://localhost:3100/v1/search?'
         results = []
         urls = []
-        df2 = pd.read_csv(self.input().open('r'), dtype= 'str')
-
+        df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
+	print vars(self.input())
         for row in df2.values:
-            params= {'text': str(", ".join([str(i) for i in row]))}
+            params= {'text': str(",".join([str(i) for i in row]))}
             print params
             #params['text'] = (", ".join(params['text']))
             #print params
             r = requests.get(url, params)
             print r.url
             urls.append(r.url) #urls to look at full results later
-            results.append(r.json()) # most confident result
-            geo = geojson.FeatureCollection(r.json()['features'][0])
+            results.append(r.json()) 
+            geo = r.json()
+	    with self.output().open('wb') as fd:
+            	print self.output()
+	    	fd.write(json.dumps(geo))
+	    os.system(
+'ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% r.url)	    #subprocess.call(['ogr1ogr','-f','"PostgreSQL"','PG:"dbname=geotemp user=esherman"','./in/gecoded/geocoded-2016-8-30.json','-nln','response','-append'])
+
 
         with self.output().open('wb') as fd:
             fd.write(json.dumps(results))
@@ -125,6 +134,22 @@ class GeocodeAddys(luigi.Task):
 
         with open('./in/urls.json', 'wb') as fd:
             fd.write(json.dumps(urls))
+
+class ogr(luigi.Task):
+	f = luigi.Parameter()
+
+	def output(self):
+		return luigi.LocalTarget('./in/gecoded/ogr.json')
+	
+	def run(self):
+		print self.f
+		for index in self.f:
+			print  index
+		# os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" ./in/gecoded/geocoded-2016-8-30.json -nln response -append')
+
+
+
+
 
 class BulkGeo(luigi.WrapperTask):
     date = luigi.DateParameter(default=datetime.date.today())

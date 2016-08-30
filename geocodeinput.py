@@ -5,15 +5,16 @@ import json
 import io
 
 #fetch files
-with open('./out6_file3_address_3_clean.csv', 'rb') as f:
-    reader = csvkit.reader(f)
-    your_list = list(reader)
-    print your_list[0][0]
+def openFile():
+	with open('./out6_file3_address_3_clean.csv', 'rb') as f:
+    		reader = csvkit.reader(f)
+    		your_list = list(reader)
+    		print your_list[0][0]
     
 # input address
 
-print "Enter address to geocode: "
-address = raw_input()
+#print "Enter address to geocode: "
+#address = raw_input()
 
 #geocode
 def geocodeInput(address):
