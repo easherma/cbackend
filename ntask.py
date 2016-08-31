@@ -76,6 +76,7 @@ class CleanFiles(luigi.Task):
 class prepURL(luigi.Task):
 	""" prepping URLs for geocoder. should take a list of addresses/address fields"""
 	f = luigi.Parameter()
+    date = luigi.DateParameter(default=datetime.date.today())
 
 	def run(self):
 		url = 'http://localhost:3100/v1/search?'
