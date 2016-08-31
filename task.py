@@ -89,8 +89,7 @@ class GeocodeAddys(luigi.Task):
 		url = 'http://localhost:3100/v1/search?' #config
 		results = []
 		urls = []
-		df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
-	print vars(self.input())
+		df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4]
 		for row in df2.values:
 			params= {'text': str(",".join([str(i) for i in row]))}
 			print params
