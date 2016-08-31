@@ -99,9 +99,10 @@ class pipeToDB(luigi.Task):
         return prepURL()
 
     def run(self):
-        data = pd.read_csv(self.input())
-        for url in data:
-            print url
+        #data = pd.read_csv(self.input())
+        with self.input().open('r') as in_file:
+            for url in in_file:
+                print url
            # os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url)
 
     def output(self):
