@@ -74,9 +74,9 @@ class CleanFiles(luigi.Task):
 		return luigi.LocalTarget('./in/deduped.csv')
 
 class prepURL(luigi.Task):
+
 	""" prepping URLs for geocoder. should take a list of addresses/address fields"""
     f = luigi.Parameter()
-    date = luigi.DateParameter(default=datetime.date.today())
 
 	def run(self):
 		url = 'http://localhost:3100/v1/search?'
@@ -89,7 +89,7 @@ class prepURL(luigi.Task):
 			fd.write(json.dumps(results))
 
 	def output(self):
-		return luigi.LocalTarget('./in/gecoded/urls-%s.json'% self.date)
+		return luigi.LocalTarget('./in/gecoded/urls.json')
 
 class pipeToDB(luigi.Task):
 	""" uses ogr2ogr, fed with our generated URLS """
