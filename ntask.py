@@ -74,9 +74,8 @@ class CleanFiles(luigi.Task):
 		return luigi.LocalTarget('./in/deduped.csv')
 
 class prepURL(luigi.Task):
-
 	""" prepping URLs for geocoder. should take a list of addresses/address fields"""
-    f = luigi.Parameter()
+	f = luigi.Parameter()
 
 	def run(self):
 		url = 'http://localhost:3100/v1/search?'
