@@ -81,7 +81,7 @@ class NormalizeAddys(luigi.Task):
 
     def output(self):
             return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
-    def run(self):
+    #def run(self):
 
 class GeocodeAddys(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
