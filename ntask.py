@@ -73,6 +73,60 @@ class CleanFiles(luigi.Task):
 	def output(self):
 		return luigi.LocalTarget('./in/deduped.csv')
 
+class GeocodeAddys(luigi.Task):
+	date = luigi.DateParameter(default=datetime.date.today())
+	row_limit = 5 #config
+	file_limit = 1 #config
+	directory_target = 'path/to/folder' #config
+
+	def requires(self):
+		return CleanFiles()
+
+	def output(self):
+		return luigi.LocalTarget('./in/gecoded/geocoded-%s.json'% self.date)
+
+	def run(self):
+		url = 'http://localhost:3100/v1/search?' #config
+		results = []
+		urls = []
+		df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4]
+		for row in df2.values:
+			params= {'text': str(",".join([str(i) for i in row]))}
+			print params
+			#params['text'] = (", ".join(params['text']))
+			#print params
+			r = requests.get(url, params)
+
+			print r.url
+			urls.append(r.url) #urls to look at full results later
+			results.append(r.json())
+			geo = r.json()
+		with self.output().open('wb') as fd:
+				print self.output()
+			fd.write(json.dumps(geo))
+		os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% r.url)
+
+		with self.output().open('wb') as fd:
+			fd.write(json.dumps(results))
+
+		with open('./in/test.geojson', 'wb') as fd:
+			fd.write(geojson.dumps(geo))
+
+		with open('./in/urls.json', 'wb') as fd:
+			fd.write(json.dumps(urls))
+
+class ogr(luigi.Task):
+	f = luigi.Parameter()
+
+	def output(self):
+		return luigi.LocalTarget('./in/gecoded/ogr.json')
+
+	def run(self):
+		print self.f
+		for index in self.f:
+			print  index
+		# os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" ./in/gecoded/geocoded-2016-8-30.json -nln response -append')
+
 class prepURL(luigi.Task):
 	""" prepping URLs for geocoder. should take a list of addresses/address fields"""
 	f = luigi.Parameter()
