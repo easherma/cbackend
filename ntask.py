@@ -80,7 +80,7 @@ class prepURL(luigi.Task):
 	def run(self):
 		url = 'http://localhost:3100/v1/search?'
 		df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
-        req = requests.Request('GET', url)
+		req = requests.Request('GET', url)
 		for row in df2.values:
 			params= {'text': str(",".join([str(i) for i in row]))}
 			print req.prepare_url(url, params)
