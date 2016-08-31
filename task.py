@@ -101,7 +101,7 @@ class GeocodeAddys(luigi.Task):
         return luigi.LocalTarget('./in/gecoded/geocoded-%s.json'% self.date)
 
     def run(self):
-        url = 'http://localhost:3100/v1/search?'
+        url = 'http://localhost:3100/v1/search?' #config
         results = []
         urls = []
         df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
@@ -112,6 +112,7 @@ class GeocodeAddys(luigi.Task):
             #params['text'] = (", ".join(params['text']))
             #print params
             r = requests.get(url, params)
+
             print r.url
             urls.append(r.url) #urls to look at full results later
             results.append(r.json())
@@ -142,9 +143,39 @@ class ogr(luigi.Task):
 			print  index
 		# os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" ./in/gecoded/geocoded-2016-8-30.json -nln response -append')
 
+class prepURL(luigi.Task):
+    """ prepping URLs for geocoder. should take a list of addresses/address fields"""
+    f = luigi.Parameter()
+
+    def run(self):
+        url = 'http://localhost:3100/v1/search?'
+        df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
+        for row in df2.values:
+            params= {'text': str(",".join([str(i) for i in row]))}
+            print requests.prepare_url(url, params)
+
+        with self.output().open('wb') as fd:
+            fd.write(json.dumps(results))
+
+    def output(self):
+        return luigi.LocalTarget('./in/gecoded/urls-%s.json'% self.date)
+
+class pipeToDB(luigi.Task):
+    """ uses ogr2ogr, fed with our generated URLS """
+    def requires(self):
+        return prepURL()
+
+    def run(self):
+        data = json.loads(self.input())
+        for url in data:
+            os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url)
+
+    def output(self):
+        return luigi.LocalTarget('./in/gecoded/urls-%s.json'% self.date)
+
 class BulkGeo(luigi.WrapperTask):
     """
-    the thought/intention here is to eventually have a 'master' task that runs needed tasks.
+    the intention here is to eventually have a 'master' task that runs needed tasks.
     Might be needed more as complexity of individual steps.
     """
     date = luigi.DateParameter(default=datetime.date.today())
