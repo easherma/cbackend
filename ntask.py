@@ -81,16 +81,14 @@ class prepURL(luigi.Task):
         url = 'http://localhost:3100/v1/search?'
         df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
         req = requests.Request('GET', url = url)
-
+        urls = []
         for row in df2.values:
             params= {'text': str(",".join([str(i) for i in row]))}
             req = requests.Request('GET', url = url, params = params)
             prepped = req.prepare()
-            print req
-            print prepped
-
-        #with self.output().open('wb') as fd:
-        #    fd.write(json.dumps(results))
+            urls.append(prepped.url)
+        with self.output().open('wb') as fd:
+            fd.write(json.dumps(urls))
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/urls.json')
@@ -101,12 +99,13 @@ class pipeToDB(luigi.Task):
         return prepURL()
 
     def run(self):
-        data = json.loads(self.input())
+        data = pd.read_csv(self.input())
         for url in data:
-            os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url)
+            print url
+           # os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url)
 
     def output(self):
-        return luigi.LocalTarget('./in/gecoded/urls-%s.json'% self.date)
+        return luigi.LocalTarget('./in/gecoded/complete.json')
 
 class BulkGeo(luigi.WrapperTask):
     """
