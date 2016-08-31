@@ -70,18 +70,8 @@ class CleanFiles(luigi.Task):
 			df2.to_csv(fd, index_label = False)
 		# write to file targert
 
-
 	def output(self):
 		return luigi.LocalTarget('./in/deduped.csv')
-
-class NormalizeAddys(luigi.Task):
-	"""
-	on hold pending updates from Mapzen search
-	"""
-
-	def output(self):
-			return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
-	#def run(self):
 
 class GeocodeAddys(luigi.Task):
 	date = luigi.DateParameter(default=datetime.date.today())
