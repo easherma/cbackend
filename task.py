@@ -79,9 +79,9 @@ class CleanFiles(luigi.Task):
 
 
 class NormalizeAddys(luigi.Task):
-"""
-on hold pending updates from Mapzen search
-"""
+    """
+    on hold pending updates from Mapzen search
+    """
 
 	def output(self):
         	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
