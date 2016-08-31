@@ -15,7 +15,6 @@ import ogr
 import os
 import subprocess
 
-
 class FetchFiles(luigi.Task):
     """
     Lets fetch those client files. This is likely to be replaced by a config file.
@@ -53,8 +52,6 @@ class FetchFiles(luigi.Task):
 
         return_selected_columns()
 
-
-
 class CleanFiles(luigi.Task):
     """
     atm this just removes dupes
@@ -77,14 +74,13 @@ class CleanFiles(luigi.Task):
     def output(self):
         return luigi.LocalTarget('./in/deduped.csv')
 
-
 class NormalizeAddys(luigi.Task):
     """
     on hold pending updates from Mapzen search
     """
 
-	def output(self):
-        	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
+    def output(self):
+            return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
        def run(self):
 
 class GeocodeAddys(luigi.Task):
@@ -104,7 +100,7 @@ class GeocodeAddys(luigi.Task):
         results = []
         urls = []
         df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
-	print vars(self.input())
+    print vars(self.input())
         for row in df2.values:
             params= {'text': str(",".join([str(i) for i in row]))}
             print params
@@ -116,10 +112,10 @@ class GeocodeAddys(luigi.Task):
             urls.append(r.url) #urls to look at full results later
             results.append(r.json())
             geo = r.json()
-	    with self.output().open('wb') as fd:
-            	print self.output()
-	    	fd.write(json.dumps(geo))
-	    os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% r.url)
+        with self.output().open('wb') as fd:
+                print self.output()
+            fd.write(json.dumps(geo))
+        os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% r.url)
 
         with self.output().open('wb') as fd:
             fd.write(json.dumps(results))
@@ -131,16 +127,16 @@ class GeocodeAddys(luigi.Task):
             fd.write(json.dumps(urls))
 
 class ogr(luigi.Task):
-	f = luigi.Parameter()
+    f = luigi.Parameter()
 
-	def output(self):
-		return luigi.LocalTarget('./in/gecoded/ogr.json')
+    def output(self):
+        return luigi.LocalTarget('./in/gecoded/ogr.json')
 
-	def run(self):
-		print self.f
-		for index in self.f:
-			print  index
-		# os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" ./in/gecoded/geocoded-2016-8-30.json -nln response -append')
+    def run(self):
+        print self.f
+        for index in self.f:
+            print  index
+        # os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" ./in/gecoded/geocoded-2016-8-30.json -nln response -append')
 
 class prepURL(luigi.Task):
     """ prepping URLs for geocoder. should take a list of addresses/address fields"""
@@ -185,8 +181,8 @@ class BulkGeo(luigi.WrapperTask):
 if __name__ == '__main__':
     luigi.run()
 
-        	#def prepare_requests()
+            #def prepare_requests()
 
-        	#def send_requests()
+            #def send_requests()
 
-        	#def write_results()
+            #def write_results()
