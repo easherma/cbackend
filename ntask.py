@@ -81,14 +81,15 @@ class prepURL(luigi.Task):
         url = 'http://localhost:3100/v1/search?'
         df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
         req = requests.Request('GET', url = url)
-        urls = []
+        urls = self.output().open('w')
         for row in df2.values:
             params= {'text': str(",".join([str(i) for i in row]))}
             req = requests.Request('GET', url = url, params = params)
             prepped = req.prepare()
-            urls.append(prepped.url)
-        with self.output().open('wb') as fd:
-            fd.write(json.dumps(urls))
+            print >> urls, prepped.url
+        urls.close()
+        #with self.output().open('wb') as fd:
+        #    fd.write(urls)
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/urls.json')
@@ -102,8 +103,9 @@ class pipeToDB(luigi.Task):
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
             for url in in_file:
-                print url
-           # os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url)
+                #print url
+                print ('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url) 
+                os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url.rstrip())
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
