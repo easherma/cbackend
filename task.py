@@ -23,7 +23,6 @@ class FetchFiles(luigi.Task):
     date = luigi.DateParameter(default=datetime.date.today())
     row_limit = 5
     file_limit = 1
-    directory_target = luigi.Parameter(default )'path/to/folder'
     file_target = '../temp/out6_file3_address_10_clean.csv'
 
     def output(self):
@@ -80,9 +79,9 @@ class CleanFiles(luigi.Task):
 
 
 class NormalizeAddys(luigi.Task):
-"""
-on hold pending updates from Mapzen search
-"""
+    """
+    on hold pending updates from Mapzen search
+    """
 
 	def output(self):
         	return luigi.LocalTarget('in/normalized/normalized-%s.csv' % self.date)
