@@ -89,8 +89,8 @@ class prepURL(luigi.Task):
             print req
             print prepped
 
-        with self.output().open('wb') as fd:
-            fd.write(json.dumps(results))
+        #with self.output().open('wb') as fd:
+        #    fd.write(json.dumps(results))
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/urls.json')
