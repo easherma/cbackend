@@ -81,10 +81,13 @@ class prepURL(luigi.Task):
         url = 'http://localhost:3100/v1/search?'
         df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
         req = requests.Request('GET', url = url)
-        prepped = req.prepare()
+
         for row in df2.values:
             params= {'text': str(",".join([str(i) for i in row]))}
-            print req.prepare_url(url, params)
+            req = requests.Request('GET', url = url, params = params)
+            prepped = req.prepare()
+            print req
+            print prepped
 
         with self.output().open('wb') as fd:
             fd.write(json.dumps(results))
