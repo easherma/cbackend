@@ -6,3 +6,12 @@ Notes on libpostal for parsing/normalizing addresses:
 
 Running the task:
 'python task.py FetchFiles --local-scheduler'
+
+## ogr2ogr example 
+ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" "test2.json" -nln full_test2 -append
+for python/luigi:
+
+ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" r.json -nln response -append
+
+ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" http://localhost:3100/v1/search?text=2505+HOFFMAN+ST%2CBRONX%2C10458-6047%2CNY -nln response -append
+
