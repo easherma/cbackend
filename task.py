@@ -98,10 +98,10 @@ class GeocodeAddys(luigi.Task):
         return CleanFiles()
 
     def output(self):
-        return luigi.LocalTarget('./in/geocoded-%s.csv' % self.date)
+        return luigi.LocalTarget('./in/gecoded/geocoded-%s.csv' % self.date)
 
     def run(self):
-        url = 'https://search.mapzen.com/v1/search?api_key=search-iv_vGuI'
+        url = 'http://localhost:3100/v1/search?'
         results = []
         urls = []
         df2 = pd.read_csv(self.input().open('r'), dtype= 'str')
@@ -112,9 +112,10 @@ class GeocodeAddys(luigi.Task):
             #params['text'] = (", ".join(params['text']))
             #print params
             r = requests.get(url, params)
+            print r.url
             urls.append(r.url) #urls to look at full results later
-            results.append(r.json()['features'][0]) # most confident result
-            geo = geojson.FeatureCollection(results)
+            results.append(r.json()) # most confident result
+            geo = geojson.FeatureCollection(r.json()['features'][0])
 
         with self.output().open('wb') as fd:
             fd.write(json.dumps(results))
