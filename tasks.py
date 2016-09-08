@@ -14,6 +14,10 @@ import geojson
 import ogr
 import os
 import subprocess
+from pandas.io.json import json_normalize
+import uuid
+import sqlalchemy as sq
+
 
 class FetchFiles(luigi.Task):
     """
@@ -95,7 +99,7 @@ class prepURL(luigi.Task):
         return luigi.LocalTarget('./in/gecoded/urls.json')
 
 class pipeToDB(luigi.Task):
-    """ uses ogr2ogr, fed with our generated URLS """
+    """ uses pandas annd sqlalchemey, fed with our generated URLS """
     def requires(self):
         return prepURL()
 
@@ -104,8 +108,22 @@ class pipeToDB(luigi.Task):
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
-                print ('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url) 
-                os.system('ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" %s -nln response -append'% url.rstrip())
+                r = requests.get(url)
+                uniqueid = uuid.uuid4()
+                output = json.loads(r.text)
+                #use pandas to parse elements of geojson
+                features = json_normalize(output['features'])
+                query = json_normalize(output['geocoding'])
+                #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
+                features['id'] = uniqueid
+                query['id'] = uniqueid
+                query['bbox'] = json.dumps(output['bbox'])
+                features['geom'] = json_normalize(r.json(), 'features')['geometry']
+                engine = sq.create_engine('postgresql://esherman:@localhost:5432/geotemp')
+                features.to_sql(name='features', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                query.to_sql(name='query', con=engine, if_exists='append')                
+                
+
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
