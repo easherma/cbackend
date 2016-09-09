@@ -104,6 +104,7 @@ class pipeToDB(luigi.Task):
         return prepURL()
 
     def run(self):
+        engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
             for url in in_file:
@@ -112,16 +113,26 @@ class pipeToDB(luigi.Task):
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
-                features = json_normalize(output['features'])
-                query = json_normalize(output['geocoding'])
+                try:
+                    features = json_normalize(output['features'])
+                    features['id'] = uniqueid
+                    features['geom'] = json_normalize(r.json(), 'features')['geometry']
+                    features.to_sql(name='features_new', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+
+                except:
+                    print "FEATURES ERROR!"
+
+                try:
+                    query = json_normalize(output['geocoding'])
+                    query['id'] = uniqueid
+                    query['bbox'] = json.dumps(output['bbox'])
+                    query.to_sql(name='query_new', con=engine, if_exists='append')                
+                except:
+                    print "QUERY ERROR!"      
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
-                features['id'] = uniqueid
-                query['id'] = uniqueid
-                query['bbox'] = json.dumps(output['bbox'])
-                features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                engine = sq.create_engine('postgresql://esherman:@localhost:5432/geotemp')
-                features.to_sql(name='features', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
-                query.to_sql(name='query', con=engine, if_exists='append')                
+                #features['id'] = uniqueid
+                #query['id'] = uniqueid
+                #print query
                 
 
 
@@ -133,10 +144,10 @@ class BulkGeo(luigi.WrapperTask):
     the intention here is to eventually have a 'master' task that runs needed tasks.
     Might be needed more as complexity of individual steps.
     """
-    date = luigi.DateParameter(default=datetime.date.today())
+    
     def requires(self):
-        yield CleanFiles(self)
-        yield GeocodeAddys(self.date)
+        yield prepURL(prepURL.f)
+        yield pipeToDB()
 
 if __name__ == '__main__':
     luigi.run()
