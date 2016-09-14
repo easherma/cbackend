@@ -18,6 +18,11 @@ from pandas.io.json import json_normalize
 import uuid
 import sqlalchemy as sq
 
+def get_null_response(potential_matches):
+    matches = pd.DataFrame.from_records(potential_matches, index=['no_result'])
+    null_response = matches
+    return null_response
+
 
 class FetchFiles(luigi.Task):
     """
@@ -121,6 +126,8 @@ class pipeToDB(luigi.Task):
 
                 except:
                     print "FEATURES ERROR!"
+                    print output
+
 
                 try:
                     query = json_normalize(output['geocoding'])
@@ -128,7 +135,8 @@ class pipeToDB(luigi.Task):
                     query['bbox'] = json.dumps(output['bbox'])
                     query.to_sql(name='query_new', con=engine, if_exists='append')                
                 except:
-                    print "QUERY ERROR!"      
+                    print "QUERY ERROR!"
+                    print output
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
                 #features['id'] = uniqueid
                 #query['id'] = uniqueid
