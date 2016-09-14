@@ -140,8 +140,8 @@ class pipeToDB(luigi.Task):
                     print uniqueid
                     query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 try:
-                    features.merge(query, on='id')
-                    features.to_sql(name='features_query_merge1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                    merged = features.merge(query, on='id')
+                    merged.to_sql(name='features_query_merge1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 except:
                     print "MERGE ERROR"
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
