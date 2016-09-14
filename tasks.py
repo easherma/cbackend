@@ -123,7 +123,7 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name='features_new1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                    features.to_sql(name='features_dave_test', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -137,7 +137,7 @@ class pipeToDB(luigi.Task):
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name='query_new1', con=engine, if_exists='append')
+                    query.to_sql(name='query_dave_test', con=engine, if_exists='append')
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -148,7 +148,7 @@ class pipeToDB(luigi.Task):
                 #    query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 try:
                     merged = features.merge(query, on='id')
-                    merged.to_sql(name='features_query_merge1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                    merged.to_sql(name='features_query_dave_test', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
