@@ -124,26 +124,36 @@ class pipeToDB(luigi.Task):
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
                     features.to_sql(name='features_new1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
-                except:
-                    print "FEATURES ERROR!"
-                    print output
-                    print uniqueid
-                    #features.to_sql(name='features_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    print message
+                #except:
+                #    print "FEATURES ERROR!"
+                #    print output
+                #    print uniqueid
+                #    features.to_sql(name='features_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 try:
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name='query_new1', con=engine, if_exists='append')                
-                except:
-                    print "QUERY ERROR!"
-                    print output
-                    print uniqueid
-                    query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                    query.to_sql(name='query_new1', con=engine, if_exists='append')
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                #except:
+                #    print "QUERY ERROR!"
+                #    print output
+                #    print uniqueid
+                #    query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
                 try:
                     merged = features.merge(query, on='id')
                     merged.to_sql(name='features_query_merge1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
-                except:
-                    print "MERGE ERROR"
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                #except:
+                #    print "MERGE ERROR"
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
                 #features['id'] = uniqueid
                 #query['id'] = uniqueid
