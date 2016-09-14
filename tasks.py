@@ -124,15 +124,11 @@ class pipeToDB(luigi.Task):
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
                     features.to_sql(name='features_new1', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
-                    print 
-
                 except:
                     print "FEATURES ERROR!"
                     print output
                     print uniqueid
                     features.to_sql(name='features_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}
-
-
                 try:
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
