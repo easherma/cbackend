@@ -128,7 +128,7 @@ class pipeToDB(luigi.Task):
                     print "FEATURES ERROR!"
                     print output
                     print uniqueid
-                    features.to_sql(name='features_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}
+                    #features.to_sql(name='features_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}
                 try:
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
@@ -138,7 +138,7 @@ class pipeToDB(luigi.Task):
                     print "QUERY ERROR!"
                     print output
                     print uniqueid
-                    query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}
+                    #query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}
                 try:
                     features.merge(query, on='id')
                     features.to_sql(name='features_query_merge', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}
