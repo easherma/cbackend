@@ -119,14 +119,17 @@ class pipeToDB(luigi.Task):
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
                 try:
+                    print url, '   ', uniqueid
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
                     features.to_sql(name='features_new', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                    print 
 
                 except:
                     print "FEATURES ERROR!"
                     print output
+                    print uniqueid
 
 
                 try:
@@ -137,6 +140,7 @@ class pipeToDB(luigi.Task):
                 except:
                     print "QUERY ERROR!"
                     print output
+                    print uniqueid
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
                 #features['id'] = uniqueid
                 #query['id'] = uniqueid
