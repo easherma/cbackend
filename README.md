@@ -21,7 +21,7 @@ params to modify in the code:
 
 https://github.com/easherma/cbackend/blob/master/tasks.py#L91 pick the index numbers of the columns you want to use
 
-_I seem to recall an issue with handiling columns being out of order, but I've got to catch back up after being sick for so long_
+_I seem to recall an issue with handiling columns being out of expected order for the geocoder_
 
 ### table names
 These are hard-coded atm, that means you'll want to go in and change the names unless you want to append results to the same table. 
