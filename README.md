@@ -15,3 +15,21 @@ ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" r.json -nln response -
 
 ogr2ogr -f "PostgreSQL" PG:"dbname=geotemp user=esherman" http://localhost:3100/v1/search?text=2505+HOFFMAN+ST%2CBRONX%2C10458-6047%2CNY -nln response -append
 
+## Luigi examples/current steps and 'gotchas'
+
+params to modify in the code:
+
+https://github.com/easherma/cbackend/blob/master/tasks.py#L91 pick the index numbers of the columns you want to use
+
+_I seem to recall an issue with handiling columns being out of order, but I've got to catch back up after being sick for so long_
+
+### table names
+These are hard-coded atm, that means you'll want to go in and change the names unless you want to append results to the same table. 
+
+
+ python -m luigi --module tasks prepURL --f '/your/client/file' --local-scheduler
+ 
+ python -m luigi --module tasks pipeToDB --prepURL-f '/your/client/file' --local-scheduler
+
+
+
