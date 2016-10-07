@@ -242,7 +242,12 @@ class simpleToFile(luigi.Task):
                 print len(urls)             
         for url in urls:
             before_request = timer()
+            
             r = requests.get(url, stream=True)
+            filename = test.txt
+            with open(filename, 'wb') as fd:
+                for chunk in r.iter_content(chunk_size):
+                    fd.write(chunk)
             after_request = timer()
             print "time between", (after_request - before_request)
             before_append = timer()
