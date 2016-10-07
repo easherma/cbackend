@@ -160,15 +160,13 @@ class pipeToDB(luigi.Task):
                 #query['id'] = uniqueid
                 #print query
                 
-
-
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
 class outToFile(luigi.Task):
     """ testing speed difference of writing results to file """
     def requires(self):
         return prepURL()
-
+    @profile
     def run(self):
         #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
         #data = pd.read_csv(self.input())
