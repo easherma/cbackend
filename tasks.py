@@ -182,7 +182,7 @@ class outToFile(luigi.Task):
                 #use pandas to parse elements of geojson
                 try:
                     print url, '   ', uniqueid
-                    timeit.timeit(features = json_normalize(output['features']))
+                    features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
                     #features.to_sql(name='features_dave_test', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
