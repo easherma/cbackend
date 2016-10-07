@@ -180,7 +180,7 @@ class outToFile(luigi.Task):
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
-                import timeit(try:
+                timeit.timeit(try:
                     print url, '   ', uniqueid
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
