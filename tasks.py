@@ -233,13 +233,21 @@ class simpleToFile(luigi.Task):
     def requires(self):
         return prepURL()
     def run(self):
-        #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
-        #data = pd.read_csv(self.input())
+
+        output = []
+        urls = []
         with self.input().open('r') as in_file:
             for url in in_file:
-                #print url
-                r = requests.get(url)
-                print json.loads(r.text)
+                urls.append(url)
+                print len(urls)
+                
+        #for url in urls:
+        #    r = requests.get(url)
+        #    output.append(json.loads(r.test)        
+
+            
+        #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
+        #data = pd.read_csv(self.input())
                 #use pandas to parse elements of geojson
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
