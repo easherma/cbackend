@@ -239,11 +239,11 @@ class simpleToFile(luigi.Task):
         with self.input().open('r') as in_file:
             for url in in_file:
                 urls.append(url)
-                print len(urls)
-                
-        #for url in urls:
-        #    r = requests.get(url)
-        #    output.append(json.loads(r.test)        
+                print len(urls)             
+        for url in urls:
+            r = requests.get(url)
+            output.append(json.loads(r.test)
+            print len(output)
 
             
         #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
