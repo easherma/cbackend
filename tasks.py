@@ -18,7 +18,7 @@ from pandas.io.json import json_normalize
 import uuid
 import sqlalchemy as sq
 from timeit import default_timer as timer
-from __future__ import print_function
+#from __future__ import print_function
 
 def get_null_response(potential_matches):
     matches = pd.DataFrame.from_records(potential_matches, index=['no_result'])
