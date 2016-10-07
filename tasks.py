@@ -18,6 +18,7 @@ from pandas.io.json import json_normalize
 import uuid
 import sqlalchemy as sq
 from timeit import default_timer as timer
+import timeit
 #from __future__ import print_function
 
 def get_null_response(potential_matches):
@@ -242,6 +243,7 @@ class simpleToFile(luigi.Task):
                 print len(urls)             
         for url in urls:
             r = requests.get(url)
+            timeit.timeit(requests.get(url))
             output.append(json.loads(r.text))
             print len(output)
 
