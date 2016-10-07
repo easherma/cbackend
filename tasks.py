@@ -245,8 +245,10 @@ class simpleToFile(luigi.Task):
             r = requests.get(url)
             after_request = timer()
             print "time between", (after_request - before_request)
-
+            before_append = timer()
             output.append(json.loads(r.text))
+            after_append = timer()
+            print "time after append", (after_append - before_append)
             print len(output)
 
             
