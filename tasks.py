@@ -163,6 +163,70 @@ class pipeToDB(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
+class outToFile(luigi.Task):
+    """ testing speed difference of writing results to file """
+    def requires(self):
+        return prepURL()
+
+    def run(self):
+        #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
+        #data = pd.read_csv(self.input())
+        all_output = []
+        with self.input().open('r') as in_file:
+            for url in in_file:
+                #print url
+                r = requests.get(url)
+                uniqueid = uuid.uuid4()
+                output = json.loads(r.text)
+                #use pandas to parse elements of geojson
+                try:
+                    print url, '   ', uniqueid
+                    features = json_normalize(output['features'])
+                    features['id'] = uniqueid
+                    features['geom'] = json_normalize(r.json(), 'features')['geometry']
+                    #features.to_sql(name='features_dave_test', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    print message
+                #except:
+                #    print "FEATURES ERROR!"
+                #    print output
+                #    print uniqueid
+                #    features.to_sql(name='features_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                try:
+                    query = json_normalize(output['geocoding'])
+                    query['id'] = uniqueid
+                    query['bbox'] = json.dumps(output['bbox'])
+                    #query.to_sql(name='query_dave_test', con=engine, if_exists='append')
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    print message
+                #except:
+                #    print "QUERY ERROR!"
+                #    print output
+                #    print uniqueid
+                #    query.to_sql(name='query_errors', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                try:
+                    merged = features.merge(query, on='id')
+                    all_output.append(merged)
+                    #merged.to_sql(name='features_query_dave_test', con=engine, if_exists='append', dtype={'geom': sq.types.JSON})
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    print message
+                #except:
+                #    print "MERGE ERROR"
+                #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
+                #features['id'] = uniqueid
+                #query['id'] = uniqueid
+                #print query
+                
+
+
+    def output(self):
+        return luigi.LocalTarget('./in/gecoded/complete.json')
 
 class BulkGeo(luigi.WrapperTask):
     """
