@@ -17,6 +17,7 @@ import subprocess
 from pandas.io.json import json_normalize
 import uuid
 import sqlalchemy as sq
+import timeit
 
 def get_null_response(potential_matches):
     matches = pd.DataFrame.from_records(potential_matches, index=['no_result'])
@@ -175,7 +176,7 @@ class outToFile(luigi.Task):
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
-                r = requests.get(url)
+                timeit.timeit(r = requests.get(url))
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
