@@ -17,7 +17,8 @@ import subprocess
 from pandas.io.json import json_normalize
 import uuid
 import sqlalchemy as sq
-import time
+from timeit import default_timer as timer
+from __future__ import print_function
 
 def get_null_response(potential_matches):
     matches = pd.DataFrame.from_records(potential_matches, index=['no_result'])
@@ -173,9 +174,12 @@ class outToFile(luigi.Task):
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
-                print "in for loop", time.time()
+                in_loop = time.time()
+                print "in for loop", in_loop
                 r = requests.get(url)
-                print "got url", time.time()
+                got_url = time.time()
+                print "got url", got_url
+                print "time between", (got_url - in_loop)
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
@@ -222,11 +226,24 @@ class outToFile(luigi.Task):
                 #features['id'] = uniqueid
                 #query['id'] = uniqueid
                 #print query
-                
-
-
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
+class simpleToFile(luigi.Task):
+    """ testing speed difference of writing results to file """
+    def requires(self):
+        return prepURL()
+    def run(self):
+        #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
+        #data = pd.read_csv(self.input())
+        with self.input().open('r') as in_file:
+            for url in in_file:
+                #print url
+                r = requests.get(url)
+                print >> open('file.txt', 'w'), json.loads(r.text)
+                #use pandas to parse elements of geojson
+    def output(self):
+        return luigi.LocalTarget('./in/gecoded/complete.json')
+
 
 class BulkGeo(luigi.WrapperTask):
     """
