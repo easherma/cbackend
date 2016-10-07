@@ -176,11 +176,11 @@ class outToFile(luigi.Task):
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
-                timeit.timeit(r = requests.get(url))
+                r = requests.get(url)
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
-                try:
+                import timeit(try:
                     print url, '   ', uniqueid
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
@@ -189,7 +189,7 @@ class outToFile(luigi.Task):
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
-                    print message
+                    print message)
                 #except:
                 #    print "FEATURES ERROR!"
                 #    print output
