@@ -242,7 +242,7 @@ class simpleToFile(luigi.Task):
                 print len(urls)             
         for url in urls:
             r = requests.get(url)
-            output.append(json.loads(r.test)
+            output.append(json.loads(r.test))
             print len(output)
 
             
