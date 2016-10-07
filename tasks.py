@@ -239,20 +239,17 @@ class simpleToFile(luigi.Task):
         with self.input().open('r') as in_file:
             for url in in_file:
                 urls.append(url)
-                print len(urls)
-        #output = map(requests.get(url), 
+                print len(urls)             
         for url in urls:
-            testing = pd.read_json(url)
-            print testing
-            #before_request = timer()
-            #r = requests.get(url, stream=True)
-            #after_request = timer()
-            #print "time between", (after_request - before_request)
-            #before_append = timer()
-            #output.append(json.loads(r.text))
-            #after_append = timer()
-            #print "time after append", (after_append - before_append)
-            #print len(output)
+            before_request = timer()
+            r = requests.get(url, stream=True)
+            after_request = timer()
+            print "time between", (after_request - before_request)
+            before_append = timer()
+            output.append(json.loads(r.text))
+            after_append = timer()
+            print "time after append", (after_append - before_append)
+            print len(output)
 
             
         #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
