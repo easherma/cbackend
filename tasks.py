@@ -239,7 +239,7 @@ class simpleToFile(luigi.Task):
             for url in in_file:
                 #print url
                 r = requests.get(url)
-                print >> open('file.txt', 'w'), json.loads(r.text)
+                print >> json.loads(r.text)
                 #use pandas to parse elements of geojson
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
