@@ -242,7 +242,7 @@ class simpleToFile(luigi.Task):
                 print len(urls)             
         for url in urls:
             before_request = timer()
-            r = requests.get(url)
+            r = requests.get(url, threaded=True)
             after_request = timer()
             print "time between", (after_request - before_request)
             before_append = timer()
