@@ -111,7 +111,8 @@ class pipeToDB(luigi.Task):
         return prepURL()
 
     def run(self):
-        engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
+        db_connect_info= None
+        engine = sq.create_engine(db_connect_info)
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
             for url in in_file:
@@ -139,7 +140,7 @@ class pipeToDB(luigi.Task):
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name='query_dave_test', con=engine, if_exists='replace')
+                    query.to_sql(name='query_dave_test', con=engine, if_exists='append')
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -150,7 +151,8 @@ class pipeToDB(luigi.Task):
                 #    query.to_sql(name='query_errors', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
                 try:
                     merged = features.merge(query, on='id')
-                    merged.to_sql(name='features_query_dave_test', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
+                    merged_name=
+                    merged.to_sql(name=merged_name, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
