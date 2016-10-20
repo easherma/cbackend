@@ -67,11 +67,11 @@ class CleanFiles(luigi.Task):
     atm this just removes dupes
     """
 
-    f = luigi.Parameter() #input file named on the command line call
+    source_file = luigi.Parameter() #input file named on the command line call
 
     def run(self):
-        in_f = self.f #pass the class parm into the run function
-        df = pd.read_csv(in_f)
+        in_file = self.source_file #pass the class parm into the run function
+        df = pd.read_csv(in_file)
         del df['Unnamed: 0'] #remote index column, this shouldn't be needed
         print len(df)
         df2 = df.drop_duplicates()
@@ -85,11 +85,12 @@ class CleanFiles(luigi.Task):
 
 class prepURL(luigi.Task):
     """ prepping URLs for geocoder. should take a list of addresses/address fields"""
-    f = luigi.Parameter()
+    source_file = luigi.Parameter()
+    usecols= luigi.Parameter()
 
     def run(self):
         url = 'http://localhost:3100/v1/search?'
-        df2 = pd.read_csv(self.f, dtype= 'str', usecols= [1, 2, 3, 4])
+        df2 = pd.read_csv(self.source_file , dtype= 'str', usecols= [1, 2, 3, 4])
         req = requests.Request('GET', url = url)
         urls = self.output().open('w')
         for row in df2.values:
@@ -159,7 +160,7 @@ class pipeToDB(luigi.Task):
                 #features['id'] = uniqueid
                 #query['id'] = uniqueid
                 #print query
-                
+
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
 class outToFile(luigi.Task):
@@ -222,7 +223,7 @@ class outToFile(luigi.Task):
                 #features['id'] = uniqueid
                 #query['id'] = uniqueid
                 #print query
-                
+
 
 
     def output(self):
@@ -233,7 +234,7 @@ class BulkGeo(luigi.WrapperTask):
     the intention here is to eventually have a 'master' task that runs needed tasks.
     Might be needed more as complexity of individual steps.
     """
-    
+
     def requires(self):
         yield prepURL(prepURL.f)
         yield pipeToDB()
