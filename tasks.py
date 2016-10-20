@@ -107,11 +107,12 @@ class prepURL(luigi.Task):
 
 class pipeToDB(luigi.Task):
     """ uses pandas annd sqlalchemey, fed with our generated URLS """
+    db_connect_info= pipeToDB().db_connect_info
     def requires(self):
         return prepURL()
 
     def run(self):
-        db_connect_info= pipeToDB().db_connect_info
+
         engine = sq.create_engine(db_connect_info)
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
