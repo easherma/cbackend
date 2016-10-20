@@ -113,7 +113,7 @@ class pipeToDB(luigi.Task):
 
     def run(self):
 
-        engine = sq.create_engine(db_connect_info)
+        engine = sq.create_engine(self.db_connect_info)
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
             for url in in_file:
