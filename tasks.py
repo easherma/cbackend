@@ -107,7 +107,7 @@ class prepURL(luigi.Task):
 
 class pipeToDB(luigi.Task):
     """ uses pandas annd sqlalchemey, fed with our generated URLS """
-    db_connect_info= pipeToDB().db_connect_info
+    db_connect_info= luigi.Parameter()
     def requires(self):
         return prepURL()
 
