@@ -151,7 +151,7 @@ class pipeToDB(luigi.Task):
                 #    query.to_sql(name='query_errors', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
                 try:
                     merged = features.merge(query, on='id')
-                    merged_name=
+                    merged_name= None
                     merged.to_sql(name=merged_name, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
