@@ -18,6 +18,22 @@ from pandas.io.json import json_normalize
 import uuid
 import sqlalchemy as sq
 import time
+from concurrent import futures
+import urllib2
+
+def parallel_query(urls):
+    results = {}
+    with futures.ThreadPoolExecutor(max_workers=4) as executor:
+        tasks = dict((executor.submit(query_html, url), url) for url in urls)
+        for task in futures.as_completed(tasks):
+            results[tasks[task]] = task.result()
+    print results
+
+def query_html(url):
+    response = urllib2.urlopen(url)
+    return response.read()
+
+
 
 def get_null_response(potential_matches):
     matches = pd.DataFrame.from_records(potential_matches, index=['no_result'])
@@ -113,6 +129,19 @@ class prepURL(luigi.Task):
     def output(self):
         return luigi.LocalTarget('./in/geocoded/urls.json')
 
+class getData(luigi.Task):
+
+    def requires(self):
+        return prepURL()
+
+    def run(self):
+        urls = self.input()
+        parallel_query(urls)
+
+    def output(self):
+        return luigi.LocalTarget('./in/gecoded/para.json')
+
+
 class pipeToDB(luigi.Task):
     """ 
     uses pandas annd sqlalchemey, fed with our generated URLS 
@@ -142,6 +171,7 @@ class pipeToDB(luigi.Task):
 
         #engine.execute(CreateSchema(schema_name))
         #data = pd.read_csv(self.input())
+
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
