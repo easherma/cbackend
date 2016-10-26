@@ -129,6 +129,7 @@ class pipeToDB(luigi.Task):
         from sqlalchemy.schema import CreateSchema
         from sqlalchemy import DDL
         from sqlalchemy import event
+        from sqlalchemy.sql import text
         #result = db.engine.execute("<sql here>")
         #event.listen(Base.metadata, 'before_create', DDL("")) % schema_name
         	
