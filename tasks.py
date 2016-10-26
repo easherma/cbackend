@@ -144,7 +144,7 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name=luigi.Parameter() + '_features', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
+                    features.to_sql(name=self.name + '_features', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
