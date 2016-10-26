@@ -132,11 +132,11 @@ class pipeToDB(luigi.Task):
         from sqlalchemy.sql import text
         #result = db.engine.execute("<sql here>")
         #event.listen(Base.metadata, 'before_create', DDL("")) % schema_name
-        	
-        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True)
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
-        schema_name = username
+        schema_name = username	
+        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True)
+
         #engine.execute(CreateSchema(schema_name))
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
