@@ -24,6 +24,12 @@ def get_null_response(potential_matches):
     null_response = matches
     return null_response
 
+def make_schema():
+    from sqlalchemy.schema import CreateSchema
+    timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
+    username = str(os.getlogin())
+    schema_name = username + timestamp
+    engine.execute(CreateSchema(schema_name))
 
 class FetchFiles(luigi.Task):
     """
@@ -115,12 +121,7 @@ class pipeToDB(luigi.Task):
     def requires(self):
         return prepURL()
     # using these to name output tables, ideally this should be the schema name instead
-    def make_schema():
-        from sqlalchemy.schema import CreateSchema
-        timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
-        username = str(os.getlogin())
-        schema_name = username + timestamp
-        engine.execute(CreateSchema(schema_name))
+
 
     def run(self):
 
