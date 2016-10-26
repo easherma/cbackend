@@ -127,10 +127,12 @@ class pipeToDB(luigi.Task):
 
         engine = sq.create_engine(self.db_connect_info)
         from sqlalchemy.schema import CreateSchema
+        from sqlalchemy import DDL
+        event.listen(Base.metadata, 'before_create', DDL("CREATE SCHEMA IF NOT EXISTS %s")) % schema_name
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
         schema_name = username
-        engine.execute(CreateSchema(schema_name))
+        #engine.execute(CreateSchema(schema_name))
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
             for url in in_file:
