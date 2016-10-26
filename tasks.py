@@ -135,7 +135,7 @@ class pipeToDB(luigi.Task):
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
         schema_name = username	
-        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s", schema_name).execution_options(autocommit=True))
+        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s"% (schema_name)).execution_options(autocommit=True))
         
 
         #engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True))
@@ -154,7 +154,7 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name=self.table_name + '_features' + timestamp, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username)
+                    features.to_sql(name=timestamp + '_'+ self.table_name + '_features', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -168,7 +168,7 @@ class pipeToDB(luigi.Task):
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name=self.table_name + '_query' + timestamp, con=engine, if_exists='append', schema=username)
+                    query.to_sql(name=timestamp + '_'+ self.table_name + '_query', con=engine, if_exists='append', schema=username)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -180,7 +180,7 @@ class pipeToDB(luigi.Task):
                 try:
                     merged = features.merge(query, on='id')
                     merged_name= None
-                    merged.to_sql(name=self.table_name + '_merged' + timestamp, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username)
+                    merged.to_sql(name=timestamp + '_'+ self.table_name + '_merged', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
