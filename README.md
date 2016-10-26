@@ -13,3 +13,7 @@ python -m luigi --module tasks pipeToDB --local-scheduler
 ```
 
 
+
+
+
+
