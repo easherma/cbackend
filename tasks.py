@@ -135,7 +135,8 @@ class pipeToDB(luigi.Task):
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
         schema_name = username	
-        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True)
+        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name").execution_options(autocommit=True))
+        #engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True))
 
         #engine.execute(CreateSchema(schema_name))
         #data = pd.read_csv(self.input())
