@@ -64,7 +64,7 @@ class FetchFiles(luigi.Task):
 
 class CleanFiles(luigi.Task):
     """
-    atm this just removes dupes
+    atm this just removes dupes, but could be extended as part of the address cleaning process
     """
 
     source_file = luigi.Parameter() #input file named on the command line call
@@ -84,7 +84,9 @@ class CleanFiles(luigi.Task):
         return luigi.LocalTarget('./in/deduped.csv')
 
 class prepURL(luigi.Task):
-    """ prepping URLs for geocoder. should take a list of addresses/address fields"""
+    """ 
+    prepping URLs for geocoder. should take a list of addresses/address fields, source file defined in luigi.cfg
+    """
     source_file = luigi.Parameter()
     usecols= luigi.Parameter()
 
@@ -103,17 +105,27 @@ class prepURL(luigi.Task):
         #    fd.write(urls)
 
     def output(self):
-        return luigi.LocalTarget('./in/gecoded/urls.json')
+        return luigi.LocalTarget('./in/geocoded/urls.json')
 
 class pipeToDB(luigi.Task):
-    """ uses pandas annd sqlalchemey, fed with our generated URLS """
+    """ 
+    uses pandas annd sqlalchemey, fed with our generated URLS 
+    """
     db_connect_info= luigi.Parameter()
     def requires(self):
         return prepURL()
+    # using these to name output tables, ideally this should be the schema name instead
+    def make_schema():
+        from sqlalchemy.schema import CreateSchema
+        timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
+        username = str(os.getlogin())
+        schema_name = username + timestamp
+        engine.execute(CreateSchema(schema_name))
 
     def run(self):
 
         engine = sq.create_engine(self.db_connect_info)
+        make_schema()
         #data = pd.read_csv(self.input())
         with self.input().open('r') as in_file:
             for url in in_file:
@@ -127,7 +139,7 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name='features_dave_test', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
+                    features.to_sql(name=luigi.Parameter() +_features, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -141,7 +153,7 @@ class pipeToDB(luigi.Task):
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name='query_dave_test', con=engine, if_exists='append')
+                    query.to_sql(name=luigi.Parameter() + _query, con=engine, if_exists='append', schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -153,7 +165,7 @@ class pipeToDB(luigi.Task):
                 try:
                     merged = features.merge(query, on='id')
                     merged_name= None
-                    merged.to_sql(name=merged_name, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
+                    merged.to_sql(name= luigi.Parameter() + _query, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -166,6 +178,7 @@ class pipeToDB(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
+    
 class outToFile(luigi.Task):
     """ testing speed difference of writing results to file """
     def requires(self):
