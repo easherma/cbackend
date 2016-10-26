@@ -185,7 +185,9 @@ class pipeToDB(luigi.Task):
         return luigi.LocalTarget('./in/gecoded/complete.json')
     
 class outToFile(luigi.Task):
-    """ testing speed difference of writing results to file """
+    """ 
+    testing speed difference of writing results to file. eventually this could be offered as an alternative to pipeToDB
+    """
     def requires(self):
         return prepURL()
     def run(self):
