@@ -144,7 +144,7 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name=luigi.Parameter() +_features, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
+                    features.to_sql(name=luigi.Parameter() + '_features', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -158,7 +158,7 @@ class pipeToDB(luigi.Task):
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name=luigi.Parameter() + _query, con=engine, if_exists='append', schema=username + timestamp)
+                    query.to_sql(name=luigi.Parameter() + '_query', con=engine, if_exists='append', schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -170,7 +170,7 @@ class pipeToDB(luigi.Task):
                 try:
                     merged = features.merge(query, on='id')
                     merged_name= None
-                    merged.to_sql(name= luigi.Parameter() + _query, con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
+                    merged.to_sql(name= luigi.Parameter() + '_merged', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON}, schema=username + timestamp)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
