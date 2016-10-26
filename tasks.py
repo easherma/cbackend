@@ -129,7 +129,10 @@ class pipeToDB(luigi.Task):
         from sqlalchemy.schema import CreateSchema
         from sqlalchemy import DDL
         from sqlalchemy import event
-        event.listen(Base.metadata, 'before_create', DDL("CREATE SCHEMA IF NOT EXISTS %s")) % schema_name
+        #result = db.engine.execute("<sql here>")
+        #event.listen(Base.metadata, 'before_create', DDL("")) % schema_name
+        	
+        engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True))
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
         schema_name = username
