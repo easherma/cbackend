@@ -128,6 +128,7 @@ class pipeToDB(luigi.Task):
         engine = sq.create_engine(self.db_connect_info)
         from sqlalchemy.schema import CreateSchema
         from sqlalchemy import DDL
+        from sqlalchemy import event
         event.listen(Base.metadata, 'before_create', DDL("CREATE SCHEMA IF NOT EXISTS %s")) % schema_name
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
