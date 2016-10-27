@@ -98,7 +98,7 @@ class prepURL(luigi.Task):
 
     def run(self):
         url = 'http://localhost:3100/v1/search?'
-        df2 = pd.read_csv(self.source_file , dtype= 'str', usecols= [1, 2, 3, 4])
+        df2 = pd.read_csv(self.source_file , dtype= 'str', usecols= usecols)
         req = requests.Request('GET', url = url)
         urls = self.output().open('w')
         for row in df2.values:
