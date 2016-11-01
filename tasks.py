@@ -90,7 +90,7 @@ class CleanFiles(luigi.Task):
         return luigi.LocalTarget('./in/deduped.csv')
 
 class prepURL(luigi.Task):
-    """ 
+    """
     prepping URLs for geocoder. should take a list of addresses/address fields, source file defined in luigi.cfg
     """
     source_file = luigi.Parameter()
@@ -114,8 +114,8 @@ class prepURL(luigi.Task):
         return luigi.LocalTarget('./in/geocoded/urls.json')
 
 class pipeToDB(luigi.Task):
-    """ 
-    uses pandas annd sqlalchemey, fed with our generated URLS 
+    """
+    uses pandas annd sqlalchemey, fed with our generated URLS
     """
     db_connect_info= luigi.Parameter()
     def requires(self):
@@ -134,9 +134,9 @@ class pipeToDB(luigi.Task):
         #event.listen(Base.metadata, 'before_create', DDL("")) % schema_name
         timestamp = str(datetime.datetime.utcnow()).replace (" ", "_")
         username = str(os.getlogin())
-        schema_name = username	
+        schema_name = username
         engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s"% (schema_name)).execution_options(autocommit=True))
-        
+        out_named_table = timestamp + '_'+ self.table_name
 
         #engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s" % schema_name)).execution_options(autocommit=True))
 
@@ -154,7 +154,7 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name=timestamp + '_'+ self.table_name + '_features', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}, schema=username)
+                    features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}, schema=username)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -168,7 +168,7 @@ class pipeToDB(luigi.Task):
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
                     query['bbox'] = json.dumps(output['bbox'])
-                    query.to_sql(name=timestamp + '_'+ self.table_name + '_query', con=engine, if_exists='append', schema=username)
+                    query.to_sql(name=out_named_table + '_query', con=engine, if_exists='append', schema=username)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -180,7 +180,8 @@ class pipeToDB(luigi.Task):
                 try:
                     merged = features.merge(query, on='id')
                     merged_name= None
-                    merged.to_sql(name=timestamp + '_'+ self.table_name + '_merged', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}, schema=username)
+                    merged.to_sql(name=out_named_table '_merged', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}, schema=username)
+
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -193,9 +194,31 @@ class pipeToDB(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
-    
+
+class createView(luigi.Task):
+    #username view
+    #table(s)
+    #stgeom
+    #threshold/where clauses
+    def requires(self):
+        return  prepToDB()
+    def run(self):
+        engine = sq.create_engine(self.db_connect_info)
+        with engine.connect() as con:
+
+            tables = con.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'dmcquown'AND tablename LIKE '2016%'")
+
+            for table in tables:
+                geoms = con.execute("SELECT * , ST_GeomFromGeoJSON(geom::text) FROM 'dmcquown.table' LIMIT 10")
+                for geom in geoms:
+                    print geom      
+        #give table name as parameter, SELECT *, ST_geomfromgeojson(geom)  from tablename
+        #SELECT * , ST_GeomFromGeoJSON(geom::text) FROM dmcquown."2016-10-27_12:42:57.343718_newtest_merged" LIMIT 10
+        # get list of tablenames SELECT tablename FROM pg_tables WHERE schemaname = 'dmcquown'AND tablename LIKE '2016%')
+        #for each table name, CREATE VIEW viewname AS SELECT *, ST_GeomFromGeoJSON WHERE confidence > threshold
+
 class outToFile(luigi.Task):
-    """ 
+    """
     testing speed difference of writing results to file. eventually this could be offered as an alternative to pipeToDB
     """
     def requires(self):
