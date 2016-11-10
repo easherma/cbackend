@@ -260,24 +260,24 @@ class pipeToDB(luigi.Task):
 #     def output(self):
 #         return luigi.LocalTarget('./in/gecoded/complete.json')
 
-class createView(luigi.Task):
-    db_connect_info= luigi.Parameter()
-    from sqlalchemy import text
-    #threshold
-    #schema name
-    #table name
-    #limit
-    #def requires(self):
-    #    return  prepToDB()
-    def run(self):
-        engine = sq.create_engine(self.db_connect_info)
-        with engine.connect() as con:
-            tables = con.execute(sq.text("SELECT *  FROM schema+tablename WHERE "properties.confidence" > threshold #try other params too, not just the confidence score ORDER BY "properties.confidence"))
-
-
-                #geoms = con.execute(sq.text('SELECT * , ST_GeomFromGeoJSON(geomjson::text) AS geom FROM dmcquown."{}"'.format(bytes(table.values()[0]))))
-    def output(self):
-        return luigi.LocalTarget('./in/gecoded/complete.json')
+# class createView(luigi.Task):
+#     db_connect_info= luigi.Parameter()
+#     from sqlalchemy import text
+#     #threshold
+#     #schema name
+#     #table name
+#     #limit
+#     #def requires(self):
+#     #    return  prepToDB()
+#     def run(self):
+#         engine = sq.create_engine(self.db_connect_info)
+#         with engine.connect() as con:
+#             tables = con.execute(sq.text("SELECT *  FROM schema+tablename WHERE "properties.confidence" > threshold #try other params too, not just the confidence score ORDER BY "properties.confidence"))
+#
+#
+#                 #geoms = con.execute(sq.text('SELECT * , ST_GeomFromGeoJSON(geomjson::text) AS geom FROM dmcquown."{}"'.format(bytes(table.values()[0]))))
+#     def output(self):
+#         return luigi.LocalTarget('./in/gecoded/complete.json')
 
 class BulkGeo(luigi.WrapperTask):
     """
