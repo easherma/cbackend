@@ -211,10 +211,24 @@ class createView(luigi.Task):
             for table in tables:
                 #import pdb; pdb.set_trace()
                 #@TODO steps are here, need to clean up for current tables and set up the flow to work from scratch. some uneeded steps here if done from the get go, check name of geom column created, add the column then update it
-                con.execute(sq.text('ALTER TABLE dmcquown."{}" RENAME geom TO geomjson;'.format(bytes(table.values()[0]))))
-                con.execute(sq.text('ALTER TABLE dmcquown."{}" ADD COLUMN geom geometry(Point, 4326);'.format(bytes(table.values()[0]))))
-                con.execute(sq.text('UPDATE dmcquown."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(bytes(table.values()[0]))))
-
+                try:
+                    con.execute(sq.text('ALTER TABLE dmcquown."{}" RENAME geom TO geomjson;'.format(bytes(table.values()[0]))))
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    pass
+                try:
+                    con.execute(sq.text('ALTER TABLE dmcquown."{}" ADD COLUMN geom geometry(Point, 4326);'.format(bytes(table.values()[0]))))
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    pass
+                try:
+                    con.execute(sq.text('UPDATE dmcquown."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(bytes(table.values()[0]))))
+                except Exception as ex:
+                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                    message = template.format(type(ex).__name__, ex.args)
+                    pass
                 #geoms = con.execute(sq.text('SELECT * , ST_GeomFromGeoJSON(geomjson::text) AS geom FROM dmcquown."{}"'.format(bytes(table.values()[0]))))
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
