@@ -217,7 +217,7 @@ class pipeToDB(luigi.Task):
 
         with engine.connect() as con:
             try:
-                con.execute(sq.text('ALTER TABLE {}."{}" ADD COLUMN geom geometry(Point, 4326);'.format(username, out_named_table + '_features'))))
+                con.execute(sq.text('ALTER TABLE {}."{}" ADD COLUMN geom geometry(Point, 4326);'.format(username, out_named_table + '_features')))
             except Exception as ex:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
