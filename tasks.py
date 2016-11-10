@@ -231,34 +231,34 @@ class pipeToDB(luigi.Task):
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
 
-class addGeom(luigi.Task):
-    db_connect_info= luigi.Parameter()
-    schemaname
-    tablename
-
-    from sqlalchemy import text
-    #username view
-    #table(s)
-    #stgeom
-    #threshold/where clauses
-    def requires(self):
-        return  pipeToDB()
-    def run(self):
-        engine = sq.create_engine(self.db_connect_info)
-        with engine.connect() as con:
-            try:
-                con.execute(sq.text('ALTER TABLE {}."{}" ADD COLUMN geom geometry(Point, 4326);'.format(schemaname, tablename))))
-            except Exception as ex:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
-            try:
-                con.execute(sq.text('UPDATE {}."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(schemaname, tablename))))
-            except Exception as ex:
-                template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
-                pass
-    def output(self):
-        return luigi.LocalTarget('./in/gecoded/complete.json')
+# class addGeom(luigi.Task):
+#     db_connect_info= luigi.Parameter()
+#     schemaname
+#     tablename
+#
+#     from sqlalchemy import text
+#     #username view
+#     #table(s)
+#     #stgeom
+#     #threshold/where clauses
+#     def requires(self):
+#         return  pipeToDB()
+#     def run(self):
+#         engine = sq.create_engine(self.db_connect_info)
+#         with engine.connect() as con:
+#             try:
+#                 con.execute(sq.text('ALTER TABLE {}."{}" ADD COLUMN geom geometry(Point, 4326);'.format(schemaname, tablename))))
+#             except Exception as ex:
+#                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
+#                 message = template.format(type(ex).__name__, ex.args)
+#             try:
+#                 con.execute(sq.text('UPDATE {}."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(schemaname, tablename))))
+#             except Exception as ex:
+#                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
+#                 message = template.format(type(ex).__name__, ex.args)
+#                 pass
+#     def output(self):
+#         return luigi.LocalTarget('./in/gecoded/complete.json')
 
 class createView(luigi.Task):
     db_connect_info= luigi.Parameter()
