@@ -153,8 +153,8 @@ class pipeToDB(luigi.Task):
                     print url, '   ', uniqueid
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
-                    features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}, schema=username)
+                    features['geomjson'] = json_normalize(r.json(), 'features')['geometry']
+                    features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON}, schema=username)
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
@@ -180,7 +180,7 @@ class pipeToDB(luigi.Task):
                 try:
                     merged = features.merge(query, on='id')
                     merged_name= None
-                    merged.to_sql(name=out_named_table '_merged', con=engine, if_exists='append', dtype={'geom': sq.types.JSON}, schema=username)
+                    merged.to_sql(name=out_named_table + '_merged', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON}, schema=username)
 
                 except Exception as ex:
                     template = "An exception of type {0} occured. Arguments:\n{1!r}"
@@ -196,92 +196,26 @@ class pipeToDB(luigi.Task):
         return luigi.LocalTarget('./in/gecoded/complete.json')
 
 class createView(luigi.Task):
+    db_connect_info= luigi.Parameter()
+    from sqlalchemy import text
     #username view
     #table(s)
     #stgeom
     #threshold/where clauses
-    def requires(self):
-        return  prepToDB()
+    #def requires(self):
+    #    return  prepToDB()
     def run(self):
         engine = sq.create_engine(self.db_connect_info)
         with engine.connect() as con:
-
-            tables = con.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'dmcquown'AND tablename LIKE '2016%'")
-
+            tables = con.execute(sq.text("SELECT tablename FROM pg_tables WHERE schemaname = 'dmcquown'AND tablename LIKE '2016%' AND tablename LIKE '%merged%'"))
             for table in tables:
-                geoms = con.execute("SELECT * , ST_GeomFromGeoJSON(geom::text) FROM 'dmcquown.table' LIMIT 10")
-                for geom in geoms:
-                    print geom      
-        #give table name as parameter, SELECT *, ST_geomfromgeojson(geom)  from tablename
-        #SELECT * , ST_GeomFromGeoJSON(geom::text) FROM dmcquown."2016-10-27_12:42:57.343718_newtest_merged" LIMIT 10
-        # get list of tablenames SELECT tablename FROM pg_tables WHERE schemaname = 'dmcquown'AND tablename LIKE '2016%')
-        #for each table name, CREATE VIEW viewname AS SELECT *, ST_GeomFromGeoJSON WHERE confidence > threshold
+                #import pdb; pdb.set_trace()
+                #@TODO steps are here, need to clean up for current tables and set up the flow to work from scratch. some uneeded steps here if done from the get go, check name of geom column created, add the column then update it
+                con.execute(sq.text('ALTER TABLE dmcquown."{}" RENAME geom TO geomjson;'.format(bytes(table.values()[0]))))
+                con.execute(sq.text('ALTER TABLE dmcquown."{}" ADD COLUMN geom geometry(Point, 4326);'.format(bytes(table.values()[0]))))
+                con.execute(sq.text('UPDATE dmcquown."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(bytes(table.values()[0]))))
 
-class outToFile(luigi.Task):
-    """
-    testing speed difference of writing results to file. eventually this could be offered as an alternative to pipeToDB
-    """
-    def requires(self):
-        return prepURL()
-    def run(self):
-        #engine = sq.create_engine('postgresql://esherman:Deed2World!@localhost:5432/geotemp')
-        #data = pd.read_csv(self.input())
-        all_output = []
-        with self.input().open('r') as in_file:
-            for url in in_file:
-                #print url
-                print "in for loop", time.time()
-                r = requests.get(url)
-                print "got url", time.time()
-                uniqueid = uuid.uuid4()
-                output = json.loads(r.text)
-                #use pandas to parse elements of geojson
-                try:
-                    print url, '   ', uniqueid
-                    features = json_normalize(output['features'])
-                    features['id'] = uniqueid
-                    features['geom'] = json_normalize(r.json(), 'features')['geometry']
-                    #features.to_sql(name='features_dave_test', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
-                except Exception as ex:
-                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                    message = template.format(type(ex).__name__, ex.args)
-                    print message
-                #except:
-                #    print "FEATURES ERROR!"
-                #    print output
-                #    print uniqueid
-                #    features.to_sql(name='features_errors', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
-                try:
-                    query = json_normalize(output['geocoding'])
-                    query['id'] = uniqueid
-                    query['bbox'] = json.dumps(output['bbox'])
-                    #query.to_sql(name='query_dave_test', con=engine, if_exists='replace')
-                except Exception as ex:
-                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                    message = template.format(type(ex).__name__, ex.args)
-                    print message
-                #except:
-                #    print "QUERY ERROR!"
-                #    print output
-                #    print uniqueid
-                #    query.to_sql(name='query_errors', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
-                try:
-                    merged = features.merge(query, on='id')
-                    all_output.append(merged)
-                    #merged.to_sql(name='features_query_dave_test', con=engine, if_exists='replace', dtype={'geom': sq.types.JSON})
-                except Exception as ex:
-                    template = "An exception of type {0} occured. Arguments:\n{1!r}"
-                    message = template.format(type(ex).__name__, ex.args)
-                    print message
-                #except:
-                #    print "MERGE ERROR"
-                #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
-                #features['id'] = uniqueid
-                #query['id'] = uniqueid
-                #print query
-
-
-
+                #geoms = con.execute(sq.text('SELECT * , ST_GeomFromGeoJSON(geomjson::text) AS geom FROM dmcquown."{}"'.format(bytes(table.values()[0]))))
     def output(self):
         return luigi.LocalTarget('./in/gecoded/complete.json')
 
