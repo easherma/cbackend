@@ -222,7 +222,7 @@ class pipeToDB(luigi.Task):
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
             try:
-                con.execute(sq.text('UPDATE {}."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(username, out_named_table + '_features'))))
+                con.execute(sq.text('UPDATE {}."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(username, out_named_table + '_features')))
             except Exception as ex:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
