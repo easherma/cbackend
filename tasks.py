@@ -126,7 +126,7 @@ class prepURL(luigi.Task):
     
     def run(self):
         url = 'http://localhost:3100/v1/search?'
-	print list(self.usecols)	
+    print list(self.usecols)    
         df2 = pd.read_csv(self.source_file, dtype= 'str', usecols=self.usecols)
         req = requests.Request('GET', url = url)
         urls = self.output().open('w')
@@ -165,12 +165,12 @@ class pipeToDB(luigi.Task):
         schema_name = username
         engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s"% (schema_name)).execution_options(autocommit=True))
         out_named_table = timestamp + '_'+ self.table_name
-	failLog = []
+    failLog = []
 
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
-		
+        
                 r = requests.get(url)
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
@@ -185,11 +185,11 @@ class pipeToDB(luigi.Task):
                     template = "A features exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
                     failed = {}
-		    failed['url'] = url
+            failed['url'] = url
                     failed['message'] = message
-		    failLog.append(failed)
-		    print message
-		    
+            failLog.append(failed)
+            print message
+            
                 #except:
                 #    print "FEATURES ERROR!"
                 #    print output
