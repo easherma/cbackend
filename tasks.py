@@ -125,8 +125,9 @@ class prepURL(luigi.Task):
 
 
     def run(self):
+        
         url = 'http://localhost:3100/v1/search?'
-    print list(self.usecols)
+        print list(self.usecols)
         df2 = pd.read_csv(self.source_file, dtype= 'str', usecols=self.usecols)
         req = requests.Request('GET', url = url)
         urls = self.output().open('w')
@@ -180,16 +181,17 @@ class pipeToDB(luigi.Task):
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geomjson'] = json_normalize(r.json(), 'features')['geometry']
-                    features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON}, schema=username)
+                    features['bbox'] = json.dumps(output['bbox'])
+                    features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
                 except Exception as ex:
                     template = "A features exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
                     failed = {}
-            failed['url'] = url
+                    failed['url'] = url
                     failed['message'] = message
-            failLog.append(failed)
-            print message
-
+                    failLog.append(failed)
+                    print message
+                    pass
                 #except:
                 #    print "FEATURES ERROR!"
                 #    print output
@@ -203,7 +205,8 @@ class pipeToDB(luigi.Task):
                 except Exception as ex:
                     template = "A query exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
-                #except:
+                    pass                
+ #except:
                 #    print "QUERY ERROR!"
                 #    print output
                 #    print uniqueid
@@ -211,11 +214,12 @@ class pipeToDB(luigi.Task):
                 try:
                     merged = features.merge(query, on='id')
                     merged_name= None
-                    merged.to_sql(name=out_named_table + '_merged', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON}, schema=username)
+                    merged.to_sql(name=out_named_table + '_merged', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
 
                 except Exception as ex:
                     template = "A merge  exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
+                    pass 
                 #except:
                 #    print "MERGE ERROR"
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
@@ -241,7 +245,7 @@ class pipeToDB(luigi.Task):
             out_file.write(json.dumps(failLog))
 
     def output(self):
-        return luigi.LocalTarget('./in/gecoded/failed.json')
+        return luigi.LocalTarget('./in/geocoded/failed.json')
 
 # class addGeom(luigi.Task):
 #     db_connect_info= luigi.Parameter()
