@@ -120,13 +120,13 @@ class prepURL(luigi.Task):
     prepping URLs for geocoder. should take a list of addresses/address fields, source file defined in luigi.cfg
     """
     source_file = luigi.Parameter()
-   
+
     usecols= luigi.ListParameter()
 
-    
+
     def run(self):
         url = 'http://localhost:3100/v1/search?'
-    print list(self.usecols)    
+    print list(self.usecols)
         df2 = pd.read_csv(self.source_file, dtype= 'str', usecols=self.usecols)
         req = requests.Request('GET', url = url)
         urls = self.output().open('w')
@@ -165,12 +165,12 @@ class pipeToDB(luigi.Task):
         schema_name = username
         engine.execute(text("CREATE SCHEMA IF NOT EXISTS %s"% (schema_name)).execution_options(autocommit=True))
         out_named_table = timestamp + '_'+ self.table_name
-    failLog = []
+        failLog = []
 
         with self.input().open('r') as in_file:
             for url in in_file:
                 #print url
-        
+
                 r = requests.get(url)
                 uniqueid = uuid.uuid4()
                 output = json.loads(r.text)
@@ -189,7 +189,7 @@ class pipeToDB(luigi.Task):
                     failed['message'] = message
             failLog.append(failed)
             print message
-            
+
                 #except:
                 #    print "FEATURES ERROR!"
                 #    print output
@@ -238,7 +238,7 @@ class pipeToDB(luigi.Task):
                 message = template.format(type(ex).__name__, ex.args)
                 pass
         with self.output().open('w') as out_file:
-            out_file.write(json.dumps(failLog))         
+            out_file.write(json.dumps(failLog))
 
     def output(self):
         return luigi.LocalTarget('./in/gecoded/failed.json')
