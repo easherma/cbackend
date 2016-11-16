@@ -125,7 +125,7 @@ class prepURL(luigi.Task):
 
 
     def run(self):
-        
+
         url = 'http://localhost:3100/v1/search?'
         print list(self.usecols)
         df2 = pd.read_csv(self.source_file, dtype= 'str', usecols=self.usecols)
@@ -182,6 +182,8 @@ class pipeToDB(luigi.Task):
                     features['id'] = uniqueid
                     features['geomjson'] = json_normalize(r.json(), 'features')['geometry']
                     features['bbox'] = json.dumps(output['bbox'])
+                    if 'properties.localadmin' not in features:
+                        features['properties.localadmin'] = 'none'
                     features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
                 except Exception as ex:
                     template = "A features exception of type {0} occured. Arguments:\n{1!r}"
@@ -205,7 +207,7 @@ class pipeToDB(luigi.Task):
                 except Exception as ex:
                     template = "A query exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
-                    pass                
+                    pass
  #except:
                 #    print "QUERY ERROR!"
                 #    print output
@@ -219,7 +221,7 @@ class pipeToDB(luigi.Task):
                 except Exception as ex:
                     template = "A merge  exception of type {0} occured. Arguments:\n{1!r}"
                     message = template.format(type(ex).__name__, ex.args)
-                    pass 
+                    pass
                 #except:
                 #    print "MERGE ERROR"
                 #add columns to dataframes, uuids for linking, bbox to the query metadata just in case its useful
@@ -237,6 +239,17 @@ class pipeToDB(luigi.Task):
                 message = template.format(type(ex).__name__, ex.args)
             try:
                 con.execute(sq.text('UPDATE {}."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(username, out_named_table + '_features')))
+            except Exception as ex:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                pass
+            try:
+                con.execute(sq.text('ALTER TABLE {}."{}" ADD COLUMN geom geometry(Point, 4326);'.format(username, out_named_table + '_merged')))
+            except Exception as ex:
+                template = "An exception of type {0} occured. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+            try:
+                con.execute(sq.text('UPDATE {}."{}" SET geom = ST_SetSRID(ST_GeomFromGeoJSON(geomjson::text), 4326);'.format(username, out_named_table + '_merged')))
             except Exception as ex:
                 template = "An exception of type {0} occured. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
