@@ -31,6 +31,11 @@ def make_schema():
     schema_name = username + timestamp
     engine.execute(CreateSchema(schema_name))
 
+def get_null_response(potential_matches):
+    matches = pd.DataFrame.from_records(potential_matches, index=['no_result'])
+    null_response = matches
+    return null_response
+
 class FetchFiles(luigi.Task):
     """
     Lets fetch those client files. This is likely to be replaced by a config file.
@@ -172,6 +177,10 @@ class pipeToDB(luigi.Task):
                     failed['url'] = url
                     failed['message'] = message
                     failLog.append(failed)
+                    columns = features.columns.values.tolist()
+                    for column in columns:
+                        features[column] = 'none'
+                    features['id'] = uniqueid
                     print message
                     pass
                 try:
