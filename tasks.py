@@ -192,9 +192,8 @@ class pipeToDB(luigi.Task):
                         features['properties.borough'] = 'none'
                     if 'properties.match_type' not in features:
                         features['properties.match_type'] = 'none'
-                    if 'properties.borough_gid ' not in features:
-                        features['properties.borough_gid '] = 'none'
-                                                                                            
+                    if 'properties.borough_gid' not in features:
+                        features['properties.borough_gid'] = 'none'
                     features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
                 except Exception as ex:
                     template = "A features exception of type {0} occured. Arguments:\n{1!r}"
