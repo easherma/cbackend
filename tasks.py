@@ -185,7 +185,6 @@ class pipeToDB(luigi.Task):
                     features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
-                    query['bbox'] = json.dumps(output['bbox'])
                     query.to_sql(name=out_named_table + '_query', con=engine, if_exists='append', schema=username)
                     print message
                     pass
