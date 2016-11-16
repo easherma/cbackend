@@ -198,7 +198,7 @@ class pipeToDB(luigi.Task):
                     message = template.format(type(ex).__name__, ex.args)
                     pass
                 try:
-                    merged = features.merge(query, on='id')
+                    merged = features.merge(query, how ='outer', on='id')
                     merged_name= None
                     merged.to_sql(name=out_named_table + '_merged', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
 
