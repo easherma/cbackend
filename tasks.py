@@ -198,11 +198,16 @@ class pipeToDB(luigi.Task):
                         features['properties.borough_gid'] = 'none'
                     try:
                         features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
-                    except Exception RuntimeError, TypeError, NameError):
+                    except (Exception, RuntimeError, TypeError, NameError):
                         pass
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
-                    query.to_sql(name=out_named_table + '_query', con=engine, if_exists='append', schema=username)
+                    try:
+                        query.to_sql(name=out_named_table + '_query', con=engine, if_exists='append', schema=username)
+                        pass
+                    except (Exception, RuntimeError, TypeError, NameError) as e:
+                        pass
+                    
                     print message
                     pass
                 try:
