@@ -184,6 +184,8 @@ class pipeToDB(luigi.Task):
                     features['properties.confidence'] = 0
                     if 'properties.localadmin' not in features:
                         features['properties.localadmin'] = 'none'
+                    if 'properties.localadmin_gid' not in features:
+                        features['properties.localadmin_gid'] = 'none'
                     if 'properties.locality' not in features:
                         features['properties.locality'] = 'none'
                     if 'properties.postalcode' not in features:
