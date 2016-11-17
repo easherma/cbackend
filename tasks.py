@@ -182,6 +182,18 @@ class pipeToDB(luigi.Task):
                         features[column] = 'none'
                     features['id'] = uniqueid
                     features['properties.confidence'] = 0
+                    if 'properties.localadmin' not in features:
+                        features['properties.localadmin'] = 'none'
+                    if 'properties.locality' not in features:
+                        features['properties.locality'] = 'none'
+                    if 'properties.postalcode' not in features:
+                        features['properties.postalcode'] = 'none'
+                    if 'properties.borough' not in features:
+                        features['properties.borough'] = 'none'
+                    if 'properties.match_type' not in features:
+                        features['properties.match_type'] = 'none'
+                    if 'properties.borough_gid' not in features:
+                        features['properties.borough_gid'] = 'none'
                     features.to_sql(name=out_named_table + '_features', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
