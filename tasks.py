@@ -99,23 +99,33 @@ class prepURL(luigi.Task):
     prepping URLs for geocoder. should take a list of addresses/address fields, source file defined in luigi.cfg
     """
     source_file = luigi.Parameter()
-
     usecols= luigi.ListParameter()
-
+    uniqueid= luigi.Parameter()
 
     def run(self):
-
         url = 'http://localhost:3100/v1/search?'
         print list(self.usecols)
-        df2 = pd.read_csv(self.source_file, dtype= 'str', usecols=self.usecols)
+        source_file = pd.read_csv(self.source_file, dtype= 'str')
         req = requests.Request('GET', url = url)
-        urls = self.output().open('w')
-        for row in df2.values:
-            params= {'text': str(",".join([str(i) for i in row]))}
+        paths = []
+        for i, row in source_file.iterrows():
+            params = {"text": str(row[usecols].values.tolist())}
             req = requests.Request('GET', url = url, params = params)
             prepped = req.prepare()
-            print >> urls, prepped.url
-        urls.close()
+            path = prepped.path_url
+            paths.append(path)
+            path = []
+        source_file['url_endpoint'] = url
+        source_file['path'] = paths
+        with self.output().open('w') as f:
+            source_file.to_csv('prepped.url')
+        # urls = self.output().open('w')
+        # for row in df2.values:
+        #     params= {'text': str(",".join([str(i) for i in row]))}
+        #     req = requests.Request('GET', url = url, params = params)
+        #     prepped = req.prepare()
+        #     print >> urls, prepped.url
+        # urls.close()
 
     def output(self):
         return luigi.LocalTarget('./in/geocoded/urls.json')
@@ -207,7 +217,7 @@ class pipeToDB(luigi.Task):
                         pass
                     except (Exception, RuntimeError, TypeError, NameError) as e:
                         pass
-                    
+
                     print message
                     pass
                 try:
