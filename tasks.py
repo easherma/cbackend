@@ -113,14 +113,14 @@ class prepURL(luigi.Task):
             params = {"text": ','.join(str(n) for n in row[self.usecols])}
             req = requests.Request('GET', url = url, params = params)
             prepped = req.prepare()
-            path = str(prepped.path_url)
+            path = str(prepped.url)
             paths.append(path)
             path = []
-        source_file['url_endpoint'] = url
-        source_file['path'] = paths
+        #source_file['url_endpoint'] = url
+        source_file['path'] =  paths
         #source_file['path'] = source_file['path'].str[0]
         with self.output().open('w') as f:
-            source_file.to_csv('prepped.url')
+            source_file.to_csv(f)
         # urls = self.output().open('w')
         # for row in df2.values:
         #     params= {'text': str(",".join([str(i) for i in row]))}
@@ -130,7 +130,7 @@ class prepURL(luigi.Task):
         # urls.close()
 
     def output(self):
-        return luigi.LocalTarget('./in/geocoded/urls.json')
+        return luigi.LocalTarget('./in/geocoded/prepped_urls.csv')
 
 class pipeToDB(luigi.Task):
     """
@@ -157,14 +157,20 @@ class pipeToDB(luigi.Task):
         out_named_table = timestamp + '_'+ self.table_name
         failLog = []
 
-        with self.input().open('r') as in_file:
-            for url in in_file:
-                r = requests.get(url)
+        with self.input().open('r') as file:
+            in_file = pd.read_csv(file, usecols=['path', 'id'])
+            
+            for row in in_file.values:
+                
+                #url = in_file['path'][row] 
+                print "TESTING: ", row[0]
+                r = requests.get(row[1])
                 uniqueid = uuid.uuid4()
+                original_id = row[0]
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
                 try:
-                    print url, '   ', uniqueid
+                    #:wqprint url, '   ', uniqueid
                     features = json_normalize(output['features'])
                     features['id'] = uniqueid
                     features['geomjson'] = json_normalize(r.json(), 'features')['geometry']
@@ -193,6 +199,7 @@ class pipeToDB(luigi.Task):
                     for column in columns:
                         features[column] = 'none'
                     features['id'] = uniqueid
+                     
                     features['properties.confidence'] = 0
                     if 'properties.localadmin' not in features:
                         features['properties.localadmin'] = 'none'
@@ -213,11 +220,13 @@ class pipeToDB(luigi.Task):
                     except (Exception, RuntimeError, TypeError, NameError):
                         pass
                     query = json_normalize(output['geocoding'])
+                    query['original_id'] = original_id
                     query['id'] = uniqueid
                     try:
                         query.to_sql(name=out_named_table + '_query', con=engine, if_exists='append', schema=username)
                         pass
                     except (Exception, RuntimeError, TypeError, NameError) as e:
+                        print message
                         pass
 
                     print message
@@ -225,6 +234,7 @@ class pipeToDB(luigi.Task):
                 try:
                     query = json_normalize(output['geocoding'])
                     query['id'] = uniqueid
+                    query['original_id'] = original_id
                     query['bbox'] = json.dumps(output['bbox'])
                     query.to_sql(name=out_named_table + '_query', con=engine, if_exists='append', schema=username)
                 except Exception as ex:
@@ -233,6 +243,8 @@ class pipeToDB(luigi.Task):
                     pass
                 try:
                     merged = features.merge(query, how ='outer', on='id')
+                    
+
                     merged_name= None
                     merged.to_sql(name=out_named_table + '_merged', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
 
