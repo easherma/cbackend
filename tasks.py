@@ -99,8 +99,8 @@ class prepURL(luigi.Task):
     prepping URLs for geocoder. should take a list of addresses/address fields, source file defined in luigi.cfg
     """
     source_file = luigi.Parameter()
-    usecols= luigi.ListParameter()
-    uniqueid= luigi.Parameter()
+    usecols=[1,2,3,4] 
+    #uniqueid= luigi.Parameter()
 
     def run(self):
         url = 'http://localhost:3100/v1/search?'
@@ -109,14 +109,16 @@ class prepURL(luigi.Task):
         req = requests.Request('GET', url = url)
         paths = []
         for i, row in source_file.iterrows():
-            params = {"text": str(row[usecols].values.tolist())}
+            #params = {"text": str(row[self.usecols].values)}
+            params = {"text": ','.join(str(n) for n in row[self.usecols])}
             req = requests.Request('GET', url = url, params = params)
             prepped = req.prepare()
-            path = prepped.path_url
+            path = str(prepped.path_url)
             paths.append(path)
             path = []
         source_file['url_endpoint'] = url
         source_file['path'] = paths
+        #source_file['path'] = source_file['path'].str[0]
         with self.output().open('w') as f:
             source_file.to_csv('prepped.url')
         # urls = self.output().open('w')
