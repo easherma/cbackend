@@ -99,7 +99,7 @@ class prepURL(luigi.Task):
     prepping URLs for geocoder. should take a list of addresses/address fields, source file defined in luigi.cfg
     """
     source_file = luigi.Parameter()
-    usecols=[1,2,3,4] 
+    usecols=luigi.ListParameter()
     #uniqueid= luigi.Parameter()
 
     def run(self):
@@ -159,10 +159,10 @@ class pipeToDB(luigi.Task):
 
         with self.input().open('r') as file:
             in_file = pd.read_csv(file, usecols=['path', 'id'])
-            
+
             for row in in_file.values:
-                
-                #url = in_file['path'][row] 
+
+                #url = in_file['path'][row]
                 print "TESTING: ", row[0]
                 r = requests.get(row[1])
                 uniqueid = uuid.uuid4()
@@ -199,7 +199,7 @@ class pipeToDB(luigi.Task):
                     for column in columns:
                         features[column] = 'none'
                     features['id'] = uniqueid
-                     
+
                     features['properties.confidence'] = 0
                     if 'properties.localadmin' not in features:
                         features['properties.localadmin'] = 'none'
@@ -243,7 +243,7 @@ class pipeToDB(luigi.Task):
                     pass
                 try:
                     merged = features.merge(query, how ='outer', on='id')
-                    
+
 
                     merged_name= None
                     merged.to_sql(name=out_named_table + '_merged', con=engine, if_exists='append', dtype={'geomjson': sq.types.JSON, 'properties.confidence': sq.types.FLOAT}, schema=username)
