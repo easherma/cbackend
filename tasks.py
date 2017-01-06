@@ -120,7 +120,7 @@ class prepURL(luigi.Task):
         source_file['path'] =  paths
         #source_file['path'] = source_file['path'].str[0]
         with self.output().open('w') as f:
-            source_file.to_csv(f)
+            source_file.to_csv(f, index_label='pandas_index')
         # urls = self.output().open('w')
         # for row in df2.values:
         #     params= {'text': str(",".join([str(i) for i in row]))}
