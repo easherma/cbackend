@@ -100,6 +100,9 @@ class prepURL(luigi.Task):
     """
     source_file = luigi.Parameter()
     usecols=luigi.ListParameter()
+    
+     
+    
     #uniqueid= luigi.Parameter()
 
     def run(self):
@@ -108,9 +111,10 @@ class prepURL(luigi.Task):
         source_file = pd.read_csv(self.source_file, dtype= 'str')
         req = requests.Request('GET', url = url)
         paths = []
+        print self.usecols
         for i, row in source_file.iterrows():
             #params = {"text": str(row[self.usecols].values)}
-            params = {"text": ','.join(str(n) for n in row[self.usecols])}
+            params = {"text": ','.join(str(n) for n in row[list(self.usecols)])}
             req = requests.Request('GET', url = url, params = params)
             prepped = req.prepare()
             path = str(prepped.url)
@@ -167,7 +171,7 @@ class pipeToDB(luigi.Task):
                 print "TESTING: ", row[0]
                 r = requests.get(row[1])
                 uniqueid = uuid.uuid4()
-                original_id = row[original_id]
+                original_id = row[self.original_id_index]
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
                 try:
