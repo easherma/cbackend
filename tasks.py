@@ -141,7 +141,7 @@ class pipeToDB(luigi.Task):
         return prepURL()
     # using these to name output tables, ideally this should be the schema name instead
     table_name = luigi.Parameter()
-    original_id_index = luigi.Parameter()
+    original_id_index = luigi.IntParameter()
 
     def run(self):
 
