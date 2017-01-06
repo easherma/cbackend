@@ -141,6 +141,7 @@ class pipeToDB(luigi.Task):
         return prepURL()
     # using these to name output tables, ideally this should be the schema name instead
     table_name = luigi.Parameter()
+    original_id = luigi.Parameter()
 
     def run(self):
 
@@ -166,7 +167,7 @@ class pipeToDB(luigi.Task):
                 print "TESTING: ", row[0]
                 r = requests.get(row[1])
                 uniqueid = uuid.uuid4()
-                original_id = row[0]
+                original_id = row[original_id]
                 output = json.loads(r.text)
                 #use pandas to parse elements of geojson
                 try:
