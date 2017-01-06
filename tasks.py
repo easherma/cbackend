@@ -100,9 +100,9 @@ class prepURL(luigi.Task):
     """
     source_file = luigi.Parameter()
     usecols=luigi.ListParameter()
-    
-     
-    
+
+
+
     #uniqueid= luigi.Parameter()
 
     def run(self):
@@ -146,6 +146,7 @@ class pipeToDB(luigi.Task):
     # using these to name output tables, ideally this should be the schema name instead
     table_name = luigi.Parameter()
     original_id_index = luigi.IntParameter()
+    original_id_name=luigi.Parameter()
 
     def run(self):
 
@@ -163,7 +164,7 @@ class pipeToDB(luigi.Task):
         failLog = []
 
         with self.input().open('r') as file:
-            in_file = pd.read_csv(file, usecols=['path', 'id'])
+            in_file = pd.read_csv(file, usecols=['path', self.original_id_name])
 
             for row in in_file.values:
 
